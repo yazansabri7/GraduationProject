@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ChatSystem.BLL/ChatSystem.BLL.csproj" />
+  <Project Path="ChatSystem.DAL/ChatSystem.DAL.csproj" />
+  <Project Path="ChatSystem.DTO/ChatSystem.DTO.csproj" />
+  <Project Path="ChatSystem.PL/ChatSystem.PL.csproj" />
+</Solution>
