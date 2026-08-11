@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ChatSystem.DTO
+namespace ChatSystem.DTO.DtoRequests
 {
-    public class RegisterDoctorDto
+    public class RegisterDoctorRequest
     {
         public string UserName { get; set; }
         public string FullName { get; set; }

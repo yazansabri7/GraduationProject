@@ -1,5 +1,5 @@
 ﻿using ChatSystem.BLL.Interfaces;
-using ChatSystem.DTO;
+using ChatSystem.DTO.DtoRequests;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,7 +15,7 @@ namespace ChatSystem.PL.Controllers
             _authService = authService;
         }
         [HttpPost("RegisterDoctor")]
-        public async Task<IActionResult> RegisterDoctor([FromBody] RegisterDoctorDto registerDto)
+        public async Task<IActionResult> RegisterDoctor([FromBody] RegisterDoctorRequest registerDto)
         {
             try
             {

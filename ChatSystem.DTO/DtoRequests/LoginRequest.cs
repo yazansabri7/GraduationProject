@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ChatSystem.DTO
+namespace ChatSystem.DTO.DtoRequests
 {
     public class LoginDto
     {
