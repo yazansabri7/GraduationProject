@@ -3,6 +3,7 @@ using ChatSystem.DAL.Models;
 using ChatSystem.DAL.Repository.Interfaces;
 using ChatSystem.DAL.Transaction.Interface;
 using ChatSystem.DTO;
+using ChatSystem.DTO.DtoRequests;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace ChatSystem.BLL.Services
             _doctorRepository = doctorRepository;
             _unitOfWork = unitOfWork;
         }
-        public async Task<string?> Login(LoginDto loginDto)
+        public async Task<string?> Login(LoginRequest loginDto)
         {
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
             if (user == null)
@@ -38,7 +39,7 @@ namespace ChatSystem.BLL.Services
             return await _jwtService.GenerateTokenAsync(user);
         }
 
-        public async Task RegisterDoctor(RegisterDoctorDto registerDto)
+        public async Task RegisterDoctor(RegisterDoctorRequest registerDto)
         {
             if (registerDto.Password != registerDto.ConfirmPassword) {
                 throw new Exception("Passwords do not match");

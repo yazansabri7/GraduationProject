@@ -1,5 +1,5 @@
 ﻿using ChatSystem.BLL.Interfaces;
-using ChatSystem.DTO;
+using ChatSystem.DTO.DtoRequests;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,7 +15,7 @@ namespace ChatSystem.PL.Controllers
             _authService = authService;
         }
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginRequest loginDto)
         {
             // Call the login method from the auth service
             var token = await _authService.Login(loginDto);
