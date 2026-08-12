@@ -25,31 +25,64 @@ namespace ChatSystem.BLL.Services
             _doctorRepository = doctorRepository;
             _unitOfWork = unitOfWork;
         }
-        public async Task<LoginResponce> Login(LoginRequest loginDto)
+        public async Task<LoginResponse> Login(LoginRequest loginDto)
         {
-            var user = await _userManager.FindByEmailAsync(loginDto.Email);
-            if (user == null)
+            try
             {
-                return new LoginResponce { Message = "Invalid email or password", success = false };
+                var user = await _userManager.FindByEmailAsync(loginDto.Email);
+                if (user is null)
+                {
+                    return new LoginResponse
+                    {
+                        Success = false,
+                        Message = "Invalid email or password"
+                    };
+                }
+                var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
+                if (!result)
+                {
+                    return new LoginResponse
+                    {
+                        Success = false,
+                        Message = "Invalid email or password"
+                    };
+                }
+                var token = await _jwtService.GenerateTokenAsync(user);
+                return new LoginResponse
+                {
+                    Success = true,
+                    Message = "Login successful",
+                    Token = token
+                };
             }
-            var result= await _userManager.CheckPasswordAsync(user , loginDto.Password);
-            if (!result)
-            {
-                return new LoginResponce { Message = "Invalid email or password", success = false };
+            catch (Exception ex) 
+            { 
+               return new LoginResponse
+               {
+                   Success = false,
+                   Message = "Login failed",
+                   Errors = new List<string> { ex.Message }
+               };
             }
-            var token = await _jwtService.GenerateTokenAsync(user);
-            return new LoginResponce { Message = "Login successful", success = true, Token = token };
         }
 
-        public async Task<RegisterResponce> RegisterDoctor(RegisterDoctorRequest registerDto)
+        public async Task<RegisterResponse> RegisterDoctor(RegisterDoctorRequest registerDto)
         {
             if (registerDto.Password != registerDto.ConfirmPassword) {
-                throw new Exception("Passwords do not match");
+                return new RegisterResponse
+                {
+                    Success = false,
+                    Message = "Password and Confirm Password do not match"
+                };
             } 
 
             var ExistingEmail = await _userManager.FindByEmailAsync(registerDto.Email);
             if (ExistingEmail != null) {
-                throw new Exception("this Email is already exist");
+                return new RegisterResponse
+                {
+                    Success = false,
+                    Message = "this Email is already exist"
+                };
             }
             var user=new ApplicationUser()
             {
@@ -59,38 +92,53 @@ namespace ChatSystem.BLL.Services
                 DateOfBirth = registerDto.DateOfBirth,
                 Gender = registerDto.Gender
             };
+                await _unitOfWork.BeginTransactionAsync();
             try
             {
-                await _unitOfWork.BeginTransactionAsync();
                 var result = await _userManager.CreateAsync(user, registerDto.Password);
                 if (!result.Succeeded)
                 {
-                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                    throw new Exception($"Failed to create user: {errors}");
+                    await _unitOfWork.RollbackAsync();
+                    return new RegisterResponse
+                    {
+                        Success = false,
+                        Message = "Failed to create user",
+                        Errors = result.Errors.Select(e => e.Description).ToList()
+                    };
                 }
+                await _userManager.AddToRoleAsync(user, "Doctor");
 
 
                 var doctor = new Doctor
                 {
                     UserId = user.Id,
-                    specialization = registerDto.specialization,
+                    Specialization = registerDto.Specialization,
                     Certificate = registerDto.Certificate
                 };
                 await _doctorRepository.Create(doctor);
 
                 await _unitOfWork.CommitAsync();
-                return new RegisterResponce { Message = "Doctor registered successfully", success = true };
 
             }
-            catch  { 
-           await  _unitOfWork.RollbackAsync();
-                throw ;
+            catch(Exception ex)
+            {
+                await _unitOfWork.RollbackAsync();
+                return new RegisterResponse
+                {
+                    Success = false,
+                    Message = "Failed to register doctor",
+                    Errors = new List<string> { ex.Message }
+                };
             }
-            
+            return new RegisterResponse
+            {
+                Success = true,
+                Message = "Doctor registered successfully"
+            };
 
         }
 
-        public async Task<RegisterResponce> RegisterPatient(RegisterPatientDto registerPatientDto)
+        public Task<RegisterResponse> RegisterPatient(RegisterPatientRequest registerPatientDto)
         {
             throw new NotImplementedException();
         }

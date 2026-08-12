@@ -10,9 +10,9 @@ namespace ChatSystem.BLL.Interfaces
 {
     public interface IAuthService
     {
-        public Task<LoginResponce> Login(LoginRequest loginDto);
+         Task<LoginResponse> Login(LoginRequest loginDto);
 
-       public Task<RegisterResponce> RegisterDoctor(RegisterDoctorRequest registerDto);
-        public Task<RegisterResponce> RegisterPatient(RegisterPatientDto registerPatientDto);
+        Task<RegisterResponse> RegisterDoctor(RegisterDoctorRequest registerDto);
+         Task<RegisterResponse> RegisterPatient(RegisterPatientRequest registerPatientDto);
     }
 }

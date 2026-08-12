@@ -20,4 +20,10 @@
     <ProjectReference Include="..\ChatSystem.DTO\ChatSystem.DTO.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Areas\Admin\" />
+    <Folder Include="Areas\Doctor\" />
+    <Folder Include="Areas\User\" />
+  </ItemGroup>
+
 </Project>

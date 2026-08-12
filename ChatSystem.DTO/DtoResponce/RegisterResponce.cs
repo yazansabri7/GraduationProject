@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ChatSystem.DTO.DtoResponce
 {
-    public class RegisterResponce : baseResponse
+    public class RegisterResponse : BaseResponse
     {
     }
 }
