@@ -4,6 +4,7 @@ using ChatSystem.DAL.Repository.Interfaces;
 using ChatSystem.DAL.Transaction.Interface;
 using ChatSystem.DTO;
 using ChatSystem.DTO.DtoRequests;
+using ChatSystem.DTO.DtoResponce;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -24,22 +25,23 @@ namespace ChatSystem.BLL.Services
             _doctorRepository = doctorRepository;
             _unitOfWork = unitOfWork;
         }
-        public async Task<string?> Login(LoginRequest loginDto)
+        public async Task<LoginResponce> Login(LoginRequest loginDto)
         {
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
             if (user == null)
             {
-                return null;
+                return new LoginResponce { Message = "Invalid email or password", success = false };
             }
             var result= await _userManager.CheckPasswordAsync(user , loginDto.Password);
             if (!result)
             {
-                return null;
+                return new LoginResponce { Message = "Invalid email or password", success = false };
             }
-            return await _jwtService.GenerateTokenAsync(user);
+            var token = await _jwtService.GenerateTokenAsync(user);
+            return new LoginResponce { Message = "Login successful", success = true, Token = token };
         }
 
-        public async Task RegisterDoctor(RegisterDoctorRequest registerDto)
+        public async Task<RegisterResponce> RegisterDoctor(RegisterDoctorRequest registerDto)
         {
             if (registerDto.Password != registerDto.ConfirmPassword) {
                 throw new Exception("Passwords do not match");
@@ -77,17 +79,18 @@ namespace ChatSystem.BLL.Services
                 await _doctorRepository.Create(doctor);
 
                 await _unitOfWork.CommitAsync();
+                return new RegisterResponce { Message = "Doctor registered successfully", success = true };
 
             }
             catch  { 
-            _unitOfWork.RollbackAsync();
+           await  _unitOfWork.RollbackAsync();
                 throw ;
             }
             
 
         }
 
-        public async Task RegisterPatient(RegisterPatientDto registerPatientDto)
+        public async Task<RegisterResponce> RegisterPatient(RegisterPatientDto registerPatientDto)
         {
             throw new NotImplementedException();
         }

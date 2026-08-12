@@ -4,7 +4,8 @@ using System.Text;
 
 namespace ChatSystem.DTO.DtoResponce
 {
-    internal class LoginResponce
+    public class LoginResponce : baseResponse
     {
+        public string ? Token { get; set; }
     }
 }

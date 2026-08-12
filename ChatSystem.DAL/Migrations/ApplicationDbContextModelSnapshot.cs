@@ -131,7 +131,7 @@ namespace ChatSystem.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Doctors");
+                    b.ToTable("Doctors", (string)null);
                 });
 
             modelBuilder.Entity("ChatSystem.DAL.Models.DoctorPatient", b =>
@@ -146,7 +146,7 @@ namespace ChatSystem.DAL.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("DoctorPatients");
+                    b.ToTable("DoctorPatients", (string)null);
                 });
 
             modelBuilder.Entity("ChatSystem.DAL.Models.Patient", b =>
@@ -174,7 +174,7 @@ namespace ChatSystem.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Patients");
+                    b.ToTable("Patients", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
