@@ -11,7 +11,7 @@ namespace ChatSystem.DTO.DtoRequests
         public string Email { get; set; }
         public string Password { get; set; }
         public string ConfirmPassword { get; set; }
-        public string specialization { get; set; }
+        public string Specialization { get; set; }
         public string Certificate { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public string Gender { get; set; }
