@@ -52,7 +52,7 @@ namespace ChatSystem.DAL.Utils
                 await userManager.CreateAsync(user2, "Basheer@123");
                 var doctor = new Doctor
                 {
-                    specialization = "General",
+                    Specialization = "General",
                     UserId = user2.Id,
                     Certificate="MBBS"
                 };

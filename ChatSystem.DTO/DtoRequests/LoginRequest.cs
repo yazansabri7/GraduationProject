@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ChatSystem.DTO.DtoRequests
 {
-    public class LoginDto
+    public class LoginRequest
     {
         public string Email { get; set; }
         public string Password { get; set; }
