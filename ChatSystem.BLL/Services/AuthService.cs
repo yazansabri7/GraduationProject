@@ -77,7 +77,7 @@ namespace ChatSystem.BLL.Services
             } 
 
             var ExistingEmail = await _userManager.FindByEmailAsync(registerDto.Email);
-            if (ExistingEmail != null) {
+            if (ExistingEmail is not null) {
                 return new RegisterResponse
                 {
                     Success = false,
