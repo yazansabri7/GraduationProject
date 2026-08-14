@@ -2,9 +2,15 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace ChatSystem.DAL.Models
 {
+    public enum Gender
+    {
+        Male=1,
+        Female=2,
+    }
     public class ApplicationUser : IdentityUser
     {
         
@@ -13,8 +19,9 @@ namespace ChatSystem.DAL.Models
         public string? City { get; set; }
         public DateTime? CreatedAt { get; set; } = DateTime.Now; 
         public DateTime?  DateOfBirth { get; set; }
-        public string Gender { get; set; }
-        
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public Gender Gender { get; set; }
+    
 
 
 

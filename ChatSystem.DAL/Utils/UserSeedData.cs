@@ -29,7 +29,7 @@ namespace ChatSystem.DAL.Utils
                     Email = "Admin@Gmail.com",
                     FullName = "Admin",
                     EmailConfirmed = true,
-                    Gender = "Male"
+                    Gender = Gender.Male
                 };
 
                 var user2 = new ApplicationUser
@@ -38,7 +38,7 @@ namespace ChatSystem.DAL.Utils
                     Email = "Basheer@Gmail.com",
                     FullName = "Basheer Daoud",
                     EmailConfirmed = true,
-                    Gender = "Male"
+                    Gender = Gender.Male
                 };
                 var user3 = new ApplicationUser
                 {
@@ -46,7 +46,7 @@ namespace ChatSystem.DAL.Utils
                     Email = "Ali@Gmail.com",
                     FullName = "Ali Daoud",
                     EmailConfirmed = true,
-                    Gender = "Male"
+                    Gender = Gender.Male
                 };
                 await userManager.CreateAsync(user1, "Admin@123");
                 await userManager.CreateAsync(user2, "Basheer@123");
