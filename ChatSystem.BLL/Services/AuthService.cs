@@ -1,10 +1,12 @@
-﻿using ChatSystem.BLL.Interfaces;
+﻿using Azure.Core;
+using ChatSystem.BLL.Interfaces;
 using ChatSystem.DAL.Models;
 using ChatSystem.DAL.Repository.Interfaces;
 using ChatSystem.DAL.Transaction.Interface;
 using ChatSystem.DTO;
 using ChatSystem.DTO.DtoRequests;
 using ChatSystem.DTO.DtoResponce;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using System;
@@ -20,17 +22,20 @@ namespace ChatSystem.BLL.Services
         private readonly IDoctorRepository _doctorRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailSender _emailSender;
+        private readonly IPatientRepository _patientRepository;
 
         public AuthService(UserManager<ApplicationUser> userManager
             , IJwtService jwtService, IDoctorRepository doctorRepository
             , IUnitOfWork unitOfWork
-            ,IEmailSender emailSender)
+            ,IEmailSender emailSender
+            ,IPatientRepository patientRepository)
         {
             _jwtService = jwtService;
             _userManager = userManager;
             _doctorRepository = doctorRepository;
             _unitOfWork = unitOfWork;
             _emailSender = emailSender;
+            _patientRepository = patientRepository;
         }
         public async Task<LoginResponse> Login(LoginRequest loginDto)
         {
@@ -73,7 +78,7 @@ namespace ChatSystem.BLL.Services
             }
         }
 
-        public async Task<RegisterResponse> RegisterDoctor(RegisterDoctorRequest registerDto)
+        public async Task<RegisterResponse> RegisterDoctor(RegisterDoctorRequest registerDto , HttpRequest request)
         {
             if (registerDto.Password != registerDto.ConfirmPassword) {
                 return new RegisterResponse
@@ -97,7 +102,8 @@ namespace ChatSystem.BLL.Services
                 Email = registerDto.Email,
                 FullName = registerDto.FullName,
                 DateOfBirth = registerDto.DateOfBirth,
-                Gender = registerDto.Gender
+                Gender = registerDto.Gender,
+                
             };
                 await _unitOfWork.BeginTransactionAsync();
             try
@@ -116,7 +122,7 @@ namespace ChatSystem.BLL.Services
                 await _userManager.AddToRoleAsync(user, "Doctor");
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 token = Uri.EscapeDataString(token);
-                var emailUrl = $"https://localhost:7247/api/Account/ConfirmEmail?&token={token}&userId={user.Id}";
+                var emailUrl = $"{request.Scheme}://{request.Host}/api/Account/ConfirmEmail?&token={token}&userId={user.Id}";
                 await _emailSender.SendEmailAsync(user.Email, "Welcome to ChatSystem", $"<h1>Welcome {user.FullName} to ChatSystem</h1>" + $"<a href='{emailUrl}'>Confirm Email</a>");
 
 
@@ -150,9 +156,78 @@ namespace ChatSystem.BLL.Services
 
         }
 
-        public Task<RegisterResponse> RegisterPatient(RegisterPatientRequest registerPatientDto)
+        public async Task<RegisterResponse> RegisterPatient(RegisterPatientRequest registerPatientDto ,HttpRequest request)
         {
-            throw new NotImplementedException();
+            if (registerPatientDto.Password != registerPatientDto.ConfirmPassword)
+            {
+                return new RegisterResponse
+                {
+                    Success = false,
+                    Message = "Password and Confirm Password do not match"
+                };
+            }
+            var existingEmail = await _userManager.FindByEmailAsync(registerPatientDto.Email);
+            if (existingEmail is not null)
+            {
+                return new RegisterResponse
+                {
+                    Success = false,
+                    Message = "this Email is already exist"
+                };
+            }
+            var user = new ApplicationUser()
+            {
+                UserName = registerPatientDto.UserName,
+                Email = registerPatientDto.Email,
+                FullName = registerPatientDto.FullName,
+                DateOfBirth = registerPatientDto.DateOfBirth,
+                Gender = registerPatientDto.Gender,
+                City = registerPatientDto.City,
+            };
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync();
+                var result = await _userManager.CreateAsync(user, registerPatientDto.Password);
+                if (!result.Succeeded)
+                {
+                    await _unitOfWork.RollbackAsync();
+                    return new RegisterResponse
+                    {
+                        Success = false,
+                        Message = "Failed to create user",
+                        Errors = result.Errors.Select(e => e.Description).ToList()
+                    };
+                }
+                await _userManager.AddToRoleAsync(user, "Patient");
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                token = Uri.EscapeDataString(token);
+                var emailUrl = $"{request.Scheme}://{request.Host}/api/Account/ConfirmEmail?&token={token}&userId={user.Id}";
+                await _emailSender.SendEmailAsync(user.Email, "Welcome to ChatSystem", $"<h1>Welcome {user.FullName} to ChatSystem</h1>" + $"<a href='{emailUrl}'>Confirm Email</a>");
+                var patient = new Patient
+                {
+                    UserId = user.Id,
+                    Age = registerPatientDto.Age,
+                    Height = registerPatientDto.Height,
+                    Weight = registerPatientDto.Weight
+                };
+                await _patientRepository.Create(patient);
+                await _unitOfWork.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackAsync();
+                return new RegisterResponse
+                {
+                    Success = false,
+                    Message = "Failed to register patient",
+                    Errors = new List<string> { ex.Message }
+                };
+            }
+            return new RegisterResponse
+            {
+                Success = true,
+                Message = "Patient registered successfully"
+            };
         }
 
         public async Task<bool> ConfirmEmailAsync(string token , string userId)
