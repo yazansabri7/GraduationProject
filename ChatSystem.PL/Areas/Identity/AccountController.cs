@@ -36,5 +36,15 @@ namespace ChatSystem.PL.Areas.Identity
             }
             return Ok(result);
         }
+        [HttpGet("ConfirmEmail")]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string token, [FromQuery] string userId)
+        {
+            var result = await _authService.ConfirmEmailAsync(token, userId);
+            if (!result)
+            {
+                return BadRequest("Failed to confirm email");
+            }
+            return Ok("Email confirmed successfully");
+        }
     }
 }

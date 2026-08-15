@@ -6,6 +6,7 @@ using ChatSystem.DTO;
 using ChatSystem.DTO.DtoRequests;
 using ChatSystem.DTO.DtoResponce;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,12 +19,18 @@ namespace ChatSystem.BLL.Services
         private readonly IJwtService _jwtService;
         private readonly IDoctorRepository _doctorRepository;
         private readonly IUnitOfWork _unitOfWork;
-        public AuthService(UserManager<ApplicationUser> userManager, IJwtService jwtService, IDoctorRepository doctorRepository, IUnitOfWork unitOfWork)
+        private readonly IEmailSender _emailSender;
+
+        public AuthService(UserManager<ApplicationUser> userManager
+            , IJwtService jwtService, IDoctorRepository doctorRepository
+            , IUnitOfWork unitOfWork
+            ,IEmailSender emailSender)
         {
             _jwtService = jwtService;
             _userManager = userManager;
             _doctorRepository = doctorRepository;
             _unitOfWork = unitOfWork;
+            _emailSender = emailSender;
         }
         public async Task<LoginResponse> Login(LoginRequest loginDto)
         {
@@ -107,6 +114,11 @@ namespace ChatSystem.BLL.Services
                     };
                 }
                 await _userManager.AddToRoleAsync(user, "Doctor");
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                token = Uri.EscapeDataString(token);
+                var emailUrl = $"https://localhost:7247/api/Account/ConfirmEmail?&token={token}&userId={user.Id}";
+                await _emailSender.SendEmailAsync(user.Email, "Welcome to ChatSystem", $"<h1>Welcome {user.FullName} to ChatSystem</h1>" + $"<a href='{emailUrl}'>Confirm Email</a>");
+
 
 
                 var doctor = new Doctor
@@ -141,6 +153,22 @@ namespace ChatSystem.BLL.Services
         public Task<RegisterResponse> RegisterPatient(RegisterPatientRequest registerPatientDto)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<bool> ConfirmEmailAsync(string token , string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is  null) {
+                return false;
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user,token);
+            if(!result.Succeeded)
+            {
+                return false;
+            } 
+            
+            return true;
         }
     }
 }
