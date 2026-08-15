@@ -11,8 +11,9 @@ namespace ChatSystem.BLL.Interfaces
     public interface IAuthService
     {
          Task<LoginResponse> Login(LoginRequest loginDto);
+         Task<bool> ConfirmEmailAsync(string token, string userId);
 
-        Task<RegisterResponse> RegisterDoctor(RegisterDoctorRequest registerDto);
+         Task<RegisterResponse> RegisterDoctor(RegisterDoctorRequest registerDto);
          Task<RegisterResponse> RegisterPatient(RegisterPatientRequest registerPatientDto);
     }
 }
