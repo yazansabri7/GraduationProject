@@ -19,7 +19,7 @@ namespace ChatSystem.PL.Areas.Identity
         [HttpPost("RegisterDoctor")]
         public async Task<IActionResult> RegisterDoctor([FromBody] RegisterDoctorRequest registerDto)
         {
-            var result = await _authService.RegisterDoctor(registerDto);
+            var result = await _authService.RegisterDoctor(registerDto , Request);
             if (!result.Success)
             {
                 return BadRequest(result);
@@ -45,6 +45,17 @@ namespace ChatSystem.PL.Areas.Identity
                 return BadRequest("Failed to confirm email");
             }
             return Ok("Email confirmed successfully");
+        }
+
+        [HttpPost("RegisterPatient")]
+        public async Task<IActionResult> RegisterPatient([FromBody] RegisterPatientRequest registerDto)
+        {
+            var result = await _authService.RegisterPatient(registerDto, Request);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
         }
     }
 }
