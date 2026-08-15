@@ -1,6 +1,7 @@
 ﻿using ChatSystem.DTO;
 using ChatSystem.DTO.DtoRequests;
 using ChatSystem.DTO.DtoResponce;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -13,7 +14,7 @@ namespace ChatSystem.BLL.Interfaces
          Task<LoginResponse> Login(LoginRequest loginDto);
          Task<bool> ConfirmEmailAsync(string token, string userId);
 
-         Task<RegisterResponse> RegisterDoctor(RegisterDoctorRequest registerDto);
-         Task<RegisterResponse> RegisterPatient(RegisterPatientRequest registerPatientDto);
+         Task<RegisterResponse> RegisterDoctor(RegisterDoctorRequest registerDto , HttpRequest request);
+         Task<RegisterResponse> RegisterPatient(RegisterPatientRequest registerPatientDto , HttpRequest request);
     }
 }
