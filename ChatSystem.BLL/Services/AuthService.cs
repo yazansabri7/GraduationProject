@@ -23,12 +23,14 @@ namespace ChatSystem.BLL.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailSender _emailSender;
         private readonly IPatientRepository _patientRepository;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
         public AuthService(UserManager<ApplicationUser> userManager
             , IJwtService jwtService, IDoctorRepository doctorRepository
             , IUnitOfWork unitOfWork
             ,IEmailSender emailSender
-            ,IPatientRepository patientRepository)
+            ,IPatientRepository patientRepository
+            ,SignInManager<ApplicationUser> signInManager)
         {
             _jwtService = jwtService;
             _userManager = userManager;
@@ -36,6 +38,7 @@ namespace ChatSystem.BLL.Services
             _unitOfWork = unitOfWork;
             _emailSender = emailSender;
             _patientRepository = patientRepository;
+            _signInManager = signInManager;
         }
         public async Task<LoginResponse> Login(LoginRequest loginDto)
         {
@@ -50,13 +53,39 @@ namespace ChatSystem.BLL.Services
                         Message = "Invalid email or password"
                     };
                 }
-                var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
-                if (!result)
+                if(await _userManager.IsLockedOutAsync(user))
                 {
                     return new LoginResponse
                     {
                         Success = false,
-                        Message = "Invalid email or password"
+                        Message = "Account is locked out , please try again later"
+                    };
+                }
+                var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, true);
+
+                if(result.IsLockedOut)
+                {
+                    return new LoginResponse
+                    {
+                        Success = false,
+                        Message = "Account is locked duo to multiple failed login attempts"
+                    };
+                }
+                else if(result.IsNotAllowed)
+                {
+                    return new LoginResponse
+                    {
+                        Success = false,
+                        Message = "Email is not confirmed , please confirm your email"
+                    };
+                }
+                if (!result.Succeeded)
+                {
+                    return new LoginResponse
+                    {
+                        Success = false,
+                        Message = "Invalid email or password",
+                        Errors = new List<string>() {result.ToString() }
                     };
                 }
                 var token = await _jwtService.GenerateTokenAsync(user);
