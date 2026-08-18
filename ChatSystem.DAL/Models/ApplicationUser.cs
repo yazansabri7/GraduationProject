@@ -21,7 +21,10 @@ namespace ChatSystem.DAL.Models
         public DateTime?  DateOfBirth { get; set; }
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public Gender Gender { get; set; }
-    
+
+        public string? CodeResetPassword { get; set; } 
+        public DateTime? CodeResetPasswordExpiration { get; set; }
+
 
 
 
