@@ -274,5 +274,76 @@ namespace ChatSystem.BLL.Services
             
             return true;
         }
+        public async Task<ForgetPasswordResponse> ForgetPasswordAsync(ForgetPasswordRequest request)
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user is null)
+            {
+                return new ForgetPasswordResponse
+                {
+                    Success = false,
+                    Message = "ُEmail not found"
+                };
+            }
+            var random = new Random();
+            var code = random.Next(10000, 99999).ToString();
+            user.CodeResetPassword = code;
+            user.CodeResetPasswordExpiration = DateTime.UtcNow.AddMinutes(10);
+            await _emailSender.SendEmailAsync(user.Email, "Reset Password", $"<p>Your Code is {code}</p>");
+            await _userManager.UpdateAsync(user);
+            return new ForgetPasswordResponse
+            {
+                Success = true,
+                Message = "Reset password code sent successfully to your Email"
+            };
+        }
+        public async Task<ResetPasswordResponse> ResetPasswordAsync(ResetPasswordRequest request)
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user is null)
+            {
+                return new ResetPasswordResponse
+                {
+                    Success = false,
+                    Message = "Email not found"
+                };
+            }
+            else if (user.CodeResetPassword != request.Code )
+            {
+                return new ResetPasswordResponse
+                {
+                    Success = false,
+                    Message = "Invalid Code"
+                };
+            }
+            else if(user.CodeResetPasswordExpiration < DateTime.UtcNow)
+            {
+                return new ResetPasswordResponse
+                {
+                    Success = false,
+                    Message = "Expired Code"
+                };
+            }
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, request.NewPassword);
+            if (!result.Succeeded)
+            {
+                return new ResetPasswordResponse
+                {
+                    Success = false,
+                    Message = "Failed to reset password",
+                    Errors = result.Errors.Select(e => e.Description).ToList()
+                };
+            }
+            user.CodeResetPassword = null;
+            user.CodeResetPasswordExpiration = null;
+            await _userManager.UpdateAsync(user);
+            await _emailSender.SendEmailAsync(user.Email, "Password Reset Successful", $"<p>Your password has been reset successfully</p>");
+            return new ResetPasswordResponse
+            {
+                Success = true,
+                Message = "Password reset successfully"
+            };
+        }
     }
 }

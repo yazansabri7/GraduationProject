@@ -57,5 +57,26 @@ namespace ChatSystem.PL.Areas.Identity
             }
             return Ok(result);
         }
+        [HttpPost("SendCode")]
+        public async Task<IActionResult> SendCode([FromBody] ForgetPasswordRequest request)
+        {
+            var result = await _authService.ForgetPasswordAsync(request);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        [HttpPatch("ResetPassword")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            var result = await _authService.ResetPasswordAsync(request);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }
