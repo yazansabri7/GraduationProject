@@ -12,6 +12,8 @@ namespace ChatSystem.DAL.Data
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public DbSet<Doctor> Doctors { get; set; }
+        public DbSet<Chat> Chats { get; set; }
+        public DbSet<Message> Messages { get; set; }
         public DbSet<Patient> Patients { get; set; }
         public DbSet<DoctorPatient> DoctorPatients { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
@@ -42,6 +44,18 @@ namespace ChatSystem.DAL.Data
                 .WithMany(d => d.DoctorPatients)
                 .HasForeignKey(dp => dp.DoctorId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Chat>()
+                .HasOne(c => c.DoctorPatient)
+                .WithOne()
+                .HasForeignKey<Chat>(c => new { c.DoctorId, c.PatientId })
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Message>()
+                .HasOne(m => m.Chat)
+                .WithMany(c => c.Messages)
+                .HasForeignKey(m => m.ChatId)
+                .OnDelete(DeleteBehavior.Cascade);
 
         }
       

@@ -48,15 +48,33 @@ namespace ChatSystem.DAL.Utils
                     EmailConfirmed = true,
                     Gender = Gender.Male
                 };
-                await userManager.CreateAsync(user1, "Admin@123");
-                await userManager.CreateAsync(user2, "Basheer@123");
+
+                var result1 = await userManager.CreateAsync(user1, "Admin@123");
+                if (! result1.Succeeded)
+                {
+                    throw new Exception(string.Join(", ",
+                result1.Errors.Select(e => e.Description)));
+                }
+                var result2= await userManager.CreateAsync(user2, "Basheer@123");
+                if(!result2.Succeeded)
+                {
+                    throw new Exception(string.Join(", ",
+                result2.Errors.Select(e => e.Description)));
+                }
+                var result3= await userManager.CreateAsync(user3, "Ali@1234");
+                if (!result3.Succeeded)
+                {
+                    throw new Exception(string.Join(", ",
+                result3.Errors.Select(e => e.Description)));
+                }
+
                 var doctor = new Doctor
                 {
                     Specialization = "General",
                     UserId = user2.Id,
                     Certificate="MBBS"
                 };
-                await userManager.CreateAsync(user3, "Ali@123");
+                
                 var patient = new Patient
                 {
                     UserId = user3.Id,

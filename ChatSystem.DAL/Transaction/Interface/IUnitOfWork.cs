@@ -9,5 +9,6 @@ namespace ChatSystem.DAL.Transaction.Interface
         Task BeginTransactionAsync();
         Task CommitAsync();
         Task RollbackAsync();
+        Task SaveChangesAsync();
     }
 }

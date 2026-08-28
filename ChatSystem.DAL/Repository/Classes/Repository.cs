@@ -41,7 +41,7 @@ namespace ChatSystem.DAL.Repository.Classes
         }
         
 
-        public async Task<T> GetById(int id)
+        public async Task<T?> GetById(int id)
         {
             return await _Context.Set<T>().FindAsync(id);
         }

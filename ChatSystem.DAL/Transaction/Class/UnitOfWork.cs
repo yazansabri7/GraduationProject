@@ -27,6 +27,11 @@ namespace ChatSystem.DAL.Transaction.Class
         {
             await _context.Database.RollbackTransactionAsync();
         }
+
+        public async Task SaveChangesAsync()
+        {
+             await _context.SaveChangesAsync();
+        }
     }
 }
 
