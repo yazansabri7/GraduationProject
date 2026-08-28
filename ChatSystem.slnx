@@ -3,4 +3,5 @@
   <Project Path="ChatSystem.DAL/ChatSystem.DAL.csproj" />
   <Project Path="ChatSystem.DTO/ChatSystem.DTO.csproj" />
   <Project Path="ChatSystem.PL/ChatSystem.PL.csproj" />
+  <Project Path="SignalRTestClient/SignalRTestClient.csproj" Id="0855e813-123e-4114-b4df-a6c803c3bb3e" />
 </Solution>

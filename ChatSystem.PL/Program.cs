@@ -1,17 +1,20 @@
+using AutoMapper;
 using ChatSystem.BLL.Interfaces;
+using ChatSystem.BLL.Mapping;
 using ChatSystem.BLL.Services;
 using ChatSystem.DAL.Data;
 using ChatSystem.DAL.Models;
-using ChatSystem.DAL.Utils;
 using ChatSystem.DAL.Repository.Classes;
 using ChatSystem.DAL.Repository.Interfaces;
 using ChatSystem.DAL.Transaction.Class;
 using ChatSystem.DAL.Transaction.Interface;
+using ChatSystem.DAL.Utils;
+using ChatSystem.PL.Hubs;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +54,23 @@ builder.Services.AddAuthentication(opt =>
 })
     .AddJwtBearer(options =>
     {
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+
+                var path = context.HttpContext.Request.Path;
+
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/hubs/chat"))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -67,6 +87,7 @@ builder.Services.AddAuthentication(opt =>
 builder.Services.AddOpenApi();
 
 // 4. DI / Repositories & Services
+builder.Services.AddAutoMapper(c => c.AddProfile<ChatSystemProfile>());
 builder.Services.AddScoped<ISeedData, RoleSeedData>();
 builder.Services.AddScoped<ISeedData, UserSeedData>();
 builder.Services.AddScoped<IJwtService, JwtService>();
@@ -77,6 +98,19 @@ builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddScoped<IChatServices, ChatServices>();
+builder.Services.AddScoped<IChatRepository, ChatRepository>();
+builder.Services.AddScoped<IDoctorPatientRepository, DoctorPatientRepository>();
+builder.Services.AddScoped<IDoctorPatientServices, DoctorPatientServices>();
+builder.Services.AddScoped<IPatientServices, PatientServices>();
+builder.Services.AddScoped<IDoctorServices, DoctorServices>();
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<IMessageServices, MessageServices>();
+
+
+builder.Services.AddSignalR();
+
+
 
 var app = builder.Build();
 
@@ -106,5 +140,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.MapControllers();
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();

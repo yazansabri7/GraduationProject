@@ -7,7 +7,7 @@ namespace ChatSystem.DAL.Repository.Interfaces
 {
     public interface IRepository<T> where T : class
     {
-        public Task<T> GetById(int id);
+        public Task<T?> GetById(int id);
         public Task<T> Create(T entity);
         public Task<T> Update(T entity);
         public Task<bool> DeleteById(int id);
