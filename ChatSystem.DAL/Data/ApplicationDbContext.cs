@@ -16,6 +16,11 @@ namespace ChatSystem.DAL.Data
         public DbSet<Message> Messages { get; set; }
         public DbSet<Patient> Patients { get; set; }
         public DbSet<DoctorPatient> DoctorPatients { get; set; }
+        public DbSet<Reading> Readings { get; set; }
+        public DbSet<BloodPressure> BloodPressures { get; set; }
+        public DbSet<GlucoseReading> GlucoseReadings { get; set; }
+        public DbSet<Medication> Medications { get; set; }
+        public DbSet<Alert> Alerts { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }

@@ -13,6 +13,9 @@ namespace ChatSystem.DAL.Models
         public double Weight { get; set; }
         public int Age { get; set; }
         public List<DoctorPatient> DoctorPatients { get; set; }
+        public List<Reading> Readings { get; set; }
+        public List<Medication> Medications { get; set; }
+        public List<Alert> Alerts { get; set; }
 
 
     }

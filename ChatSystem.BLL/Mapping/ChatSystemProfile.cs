@@ -17,6 +17,7 @@ namespace ChatSystem.BLL.Mapping
             CreateMap<DoctorPatientRequest, Chat>();
             CreateMap<Chat,ApiResponce<DoctorPatientResponce>>() ;
             CreateMap<Message,MessageResponce>() ;
+            
 
         }
     }
