@@ -1,10 +1,10 @@
-﻿using AutoMapper;
-using ChatSystem.BLL.Interfaces;
+﻿using ChatSystem.BLL.Interfaces;
 using ChatSystem.DAL.Models;
 using ChatSystem.DAL.Repository.Classes;
 using ChatSystem.DAL.Repository.Interfaces;
 using ChatSystem.DTO.DtoRequests;
 using ChatSystem.DTO.DtoResponce;
+using Mapster;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,19 +15,16 @@ namespace ChatSystem.BLL.Services
     {
         private readonly IChatRepository _chatRepository;
         private readonly IMessageRepository _messageRepository;
-        private readonly IMapper _mapper;
         private readonly IPatientRepository _patientRepository;
         private readonly IDoctorRepository _doctorRepository;
 
         public MessageServices(
             IChatRepository chatRepository,
             IMessageRepository messageRepository,
-            IMapper mapper,
             IPatientRepository patientRepository,
             IDoctorRepository doctorRepository)
         {
             _chatRepository = chatRepository;
-            _mapper = mapper;   
             _messageRepository = messageRepository;
             _patientRepository = patientRepository;
             _doctorRepository = doctorRepository;
@@ -73,7 +70,7 @@ namespace ChatSystem.BLL.Services
             {
                 Success = true,
                 Message = "Message sent successfully.",
-                Data = _mapper.Map<MessageResponce>(createdMessage)
+                Data = createdMessage.Adapt<MessageResponce>()
 
             };
         }
@@ -117,7 +114,7 @@ namespace ChatSystem.BLL.Services
             {
                 Success = true,
                 Message = "Message sent successfully.",
-                Data = _mapper.Map<MessageResponce>(createdMessage)
+                Data = createdMessage.Adapt<MessageResponce>()
             };
         }
 
@@ -156,7 +153,7 @@ namespace ChatSystem.BLL.Services
             {
                 Success = true,
                 Message = "Messages retrieved successfully.",
-                Data = _mapper.Map<List<MessageResponce>>(messages)
+                Data = messages.Adapt<List<MessageResponce>>()
             };
         }
 
@@ -195,7 +192,7 @@ namespace ChatSystem.BLL.Services
             {
                 Success = true,
                 Message = "Messages retrieved successfully.",
-                Data = _mapper.Map<List<MessageResponce>>(messages)
+                Data = messages.Adapt<List<MessageResponce>>()
             };
         }
 
