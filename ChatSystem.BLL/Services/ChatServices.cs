@@ -1,9 +1,9 @@
-﻿using AutoMapper;
-using ChatSystem.BLL.Interfaces;
+﻿using ChatSystem.BLL.Interfaces;
 using ChatSystem.DAL.Models;
 using ChatSystem.DAL.Repository.Interfaces;
 using ChatSystem.DTO.DtoRequests;
 using ChatSystem.DTO.DtoResponce;
+using Mapster;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,12 +13,10 @@ namespace ChatSystem.BLL.Services
     public class ChatServices : IChatServices
     {
         private readonly IChatRepository _chatRepository;
-        private readonly IMapper _mapper;
         private readonly IDoctorPatientRepository _patientRepository;
-        public ChatServices(IChatRepository chatRepository, IMapper mapper, IDoctorPatientRepository patientRepository)
+        public ChatServices(IChatRepository chatRepository, IDoctorPatientRepository patientRepository)
         {
             _chatRepository = chatRepository;
-            _mapper = mapper;
             _patientRepository = patientRepository;
         }
         public async Task<ApiResponce<ChatResponce>> CreateAsync(ChatRequest request)
@@ -41,14 +39,14 @@ namespace ChatSystem.BLL.Services
                     Message = "Chat already exists for this doctor-patient pair.",
                 };
             }
-            var chat = _mapper.Map<ChatRequest, Chat>(request);
+            var chat = request.Adapt<Chat>();
             var createdChat = await _chatRepository.AddAsync(chat);
 
             return new ApiResponce<ChatResponce>
             {
                 Success = true,
                 Message = "Chat created successfully.",
-                Data = _mapper.Map<Chat, ChatResponce>(createdChat)
+                Data = createdChat.Adapt<ChatResponce>()
             };
 
         }
@@ -61,7 +59,7 @@ namespace ChatSystem.BLL.Services
             {
                 Message = "Chats retrieved successfully.",
                 Success = true,
-                Data = _mapper.Map<List<ChatResponce>>(chats)
+                Data = chats.Adapt<List<ChatResponce>>()
             };
         }
 
@@ -80,7 +78,7 @@ namespace ChatSystem.BLL.Services
             {
                 Success = true,
                 Message = "Chat found successfully.",
-                Data = _mapper.Map<Chat, ChatResponce>(chat)
+                Data = chat.Adapt<ChatResponce>()
             };
         }
 
@@ -99,7 +97,7 @@ namespace ChatSystem.BLL.Services
             {
                 Success = true,
                 Message = "Chat found successfully.",
-                Data = _mapper.Map<Chat, ChatResponce>(chat)
+                Data = chat.Adapt<ChatResponce>()
             };
         }
 
@@ -111,7 +109,7 @@ namespace ChatSystem.BLL.Services
             {
                 Message = "Chats retrieved successfully.",
                 Success = true,
-                Data = _mapper.Map<List<ChatResponce>>(chats)
+                Data = chats.Adapt<List<ChatResponce>>()
             };
         }
     }

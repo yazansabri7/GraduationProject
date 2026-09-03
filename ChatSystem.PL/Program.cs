@@ -1,6 +1,5 @@
-using AutoMapper;
+using Mapster;
 using ChatSystem.BLL.Interfaces;
-using ChatSystem.BLL.Mapping;
 using ChatSystem.BLL.Services;
 using ChatSystem.DAL.Data;
 using ChatSystem.DAL.Models;
@@ -87,7 +86,6 @@ builder.Services.AddAuthentication(opt =>
 builder.Services.AddOpenApi();
 
 // 4. DI / Repositories & Services
-builder.Services.AddAutoMapper(c => c.AddProfile<ChatSystemProfile>());
 builder.Services.AddScoped<ISeedData, RoleSeedData>();
 builder.Services.AddScoped<ISeedData, UserSeedData>();
 builder.Services.AddScoped<IJwtService, JwtService>();
