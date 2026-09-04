@@ -23,7 +23,7 @@ namespace ChatSystem.PL.Areas.Patient.Controller
             var result = await _readingService.GetReadingsAsync(id);
             if (result == null)
             {
-                return NotFound("dose not found");
+                return BadRequest();
             }
 
             return Ok(result);
