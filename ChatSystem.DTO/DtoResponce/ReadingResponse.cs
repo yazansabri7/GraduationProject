@@ -11,7 +11,7 @@ namespace ChatSystem.DTO.DtoResponce
         public int PatientId { get; set; }
         public DateTime Timestamp { get; set; }
 
-        public List<BloodPressure> BloodPressures { get; set; }
-        public List<GlucoseReading> GlucoseReadings { get; set; }
+        public BloodPressureResponse? BloodPressure { get; set; }
+        public GlucoseReadingResponse? GlucoseReading { get; set; }
     }
 }

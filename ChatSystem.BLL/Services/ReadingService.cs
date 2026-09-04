@@ -27,6 +27,7 @@ namespace ChatSystem.BLL.Services
                 return null;
             }
             var readings = await _readingRepository.GetReadingsByPatientIdAsync(patientId);
+            
             return readings.Adapt<List<ReadingResponse>>();
         }
     }
