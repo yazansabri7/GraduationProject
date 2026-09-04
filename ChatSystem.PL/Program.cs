@@ -104,6 +104,8 @@ builder.Services.AddScoped<IPatientServices, PatientServices>();
 builder.Services.AddScoped<IDoctorServices, DoctorServices>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<IMessageServices, MessageServices>();
+builder.Services.AddScoped<IReadingRepository, ReadingRepository>();
+builder.Services.AddScoped<IReadingService, ReadingService>();
 
 
 builder.Services.AddSignalR();
