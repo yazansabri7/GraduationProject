@@ -28,5 +28,12 @@ namespace ChatSystem.DAL.Repository.Classes
                 .ToListAsync();
 
         }
+        public async Task<Reading> GetReadingByIdAsync(int readingId)
+        {
+            return await _context.Readings
+                .Include(r => r.GlucoseReading)
+                .Include(r => r.BloodPressure)
+                .FirstOrDefaultAsync(r => r.Id == readingId);
+        }
     }
 }
