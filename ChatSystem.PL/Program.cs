@@ -1,5 +1,5 @@
-using Mapster;
 using ChatSystem.BLL.Interfaces;
+using ChatSystem.BLL.MapsterConfigurations;
 using ChatSystem.BLL.Services;
 using ChatSystem.DAL.Data;
 using ChatSystem.DAL.Models;
@@ -9,6 +9,7 @@ using ChatSystem.DAL.Transaction.Class;
 using ChatSystem.DAL.Transaction.Interface;
 using ChatSystem.DAL.Utils;
 using ChatSystem.PL.Hubs;
+using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -106,10 +107,13 @@ builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<IMessageServices, MessageServices>();
 builder.Services.AddScoped<IReadingRepository, ReadingRepository>();
 builder.Services.AddScoped<IReadingService, ReadingService>();
-
-
+builder.Services.AddScoped<IMedicationRepository, MedicationRepository>();
+builder.Services.AddScoped<IMedicationService, MedicationService>();
 builder.Services.AddSignalR();
 
+
+//Add Mapster Configurations
+MapsterConfig.MapsterConfigRegister();
 
 
 var app = builder.Build();
