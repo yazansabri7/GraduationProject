@@ -12,6 +12,7 @@ namespace ChatSystem.BLL.MapsterConfigurations
         public static void MapsterConfigRegister()
         {
             TypeAdapterConfig<Medication, MedicationResponse>.NewConfig()
+                .Map(dest => dest.DoctorName, src => src.Patient.DoctorPatients.FirstOrDefault().Doctor.User.FullName)
                 .Map(dest => dest.PatientName, src => src.Patient.User.FullName);
         }
     }

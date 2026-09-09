@@ -9,8 +9,8 @@ namespace ChatSystem.BLL.Interfaces
     public interface IMedicationService
     {
         Task<ApiResponce<List<MedicationResponse>>> GetMedicationsByPatientIdAsync(int id);
-        Task<ApiResponce<bool>> AddMedicationAsync(MedicationRequest request);
+        Task<ApiResponce<bool>> AddMedicationAsync(MedicationRequest request ,string doctorUserId);
         Task<ApiResponce<bool>> DeleteMedicationAsync(int id);
-        Task<ApiResponce<bool>> UpdateMedicationAsync(int id, MedicationRequest request);
+        Task<ApiResponce<bool>> UpdateMedicationAsync(int id, MedicationRequest request , string doctorUserId);
     }
 }
