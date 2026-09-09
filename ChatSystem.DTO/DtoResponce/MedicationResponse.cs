@@ -7,6 +7,7 @@ namespace ChatSystem.DTO.DtoResponce
 {
     public class MedicationResponse
     {
+        public int Id { get; set; }
         public int PatientId { get; set; }
         public string DoctorName { get; set; }
         public string PatientName { get; set; }

@@ -19,7 +19,7 @@ namespace ChatSystem.PL.Areas.Doctor.Controller
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "Patient")]
+        [Authorize(Roles = "Doctor,Patient")]
         public async Task<IActionResult> GetMedications([FromRoute] int id)
         {
             var result = await _medicationService.GetMedicationsByPatientIdAsync(id);
@@ -33,7 +33,11 @@ namespace ChatSystem.PL.Areas.Doctor.Controller
         [Authorize(Roles = "Doctor")]
         public async Task<IActionResult> AddMedication([FromBody] MedicationRequest request)
         {
-            var result = await _medicationService.AddMedicationAsync(request);
+            var doctorUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(doctorUserId)) { 
+                return Unauthorized(new { Success = false, Message = "Doctor user ID not found in claims." });
+            }
+            var result = await _medicationService.AddMedicationAsync(request , doctorUserId);
             if (!result.Success)
             {
                 return BadRequest(result);
@@ -55,7 +59,12 @@ namespace ChatSystem.PL.Areas.Doctor.Controller
         [Authorize(Roles = "Doctor")]
         public async Task<IActionResult> UpdateMedication([FromRoute] int id, [FromBody] MedicationRequest request)
         {
-            var result = await _medicationService.UpdateMedicationAsync(id, request);
+            var doctorUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if(string.IsNullOrEmpty(doctorUserId))
+            {
+                return Unauthorized(new { Success = false, Message = "Doctor user ID not found in claims." });
+            }
+            var result = await _medicationService.UpdateMedicationAsync(id, request , doctorUserId);
             if (!result.Success)
             {
                 return BadRequest(result);

@@ -14,13 +14,17 @@ namespace ChatSystem.BLL.Services
     {
         private readonly IMedicationRepository _medicationRepository;
         private readonly IPatientRepository _patientRepository;
+        private readonly IDoctorPatientRepository _doctorPatientRepository;
 
-        public MedicationService(IMedicationRepository medicationRepository , IPatientRepository patientRepository)
+        public MedicationService(IMedicationRepository medicationRepository 
+            , IPatientRepository patientRepository
+            , IDoctorPatientRepository doctorPatientRepository)
         {
             _medicationRepository = medicationRepository;
             _patientRepository = patientRepository;
+            _doctorPatientRepository = doctorPatientRepository;
         }
-
+        
         public async Task<ApiResponce<List<MedicationResponse>>> GetMedicationsByPatientIdAsync(int id)
         {
             var patient = await _patientRepository.GetById(id);
@@ -41,10 +45,20 @@ namespace ChatSystem.BLL.Services
                 Data = medications.Adapt<List<MedicationResponse>>()
             };
         }
-        public async Task<ApiResponce<bool>> AddMedicationAsync(MedicationRequest request)
+        public async Task<ApiResponce<bool>> AddMedicationAsync(MedicationRequest request ,string doctorUserId)
         {
+            var isAssigned = await _doctorPatientRepository.IsDoctorAssignedToPatientAsync(doctorUserId, request.PatientId);
+            if (!isAssigned)
+            {
+                return new ApiResponce<bool>
+                {
+                    Success = false,
+                    Message = "Doctor is not assigned to this patient.",
+                    Data = false
+                };
+            }
             var patient = await _patientRepository.GetById(request.PatientId);
-            if(patient is null)
+            if (patient is null)
             {
                 return new ApiResponce<bool>
                 {
@@ -84,9 +98,19 @@ namespace ChatSystem.BLL.Services
             };
         }
 
-        public async Task<ApiResponce<bool>> UpdateMedicationAsync(int id, MedicationRequest request)
+        public async Task<ApiResponce<bool>> UpdateMedicationAsync(int id, MedicationRequest request , string doctorUserId)
         {
-           var medication = await _medicationRepository.GetById(id);
+            var isAssigned = await _doctorPatientRepository.IsDoctorAssignedToPatientAsync(doctorUserId, request.PatientId);
+            if (!isAssigned)
+            {
+                return new ApiResponce<bool>
+                {
+                    Success = false,
+                    Message = "Doctor is not assigned to this patient.",
+                    Data = false
+                };
+            }
+            var medication = await _medicationRepository.GetById(id);
             if(medication is null)
             {
                 return new ApiResponce<bool>
@@ -106,7 +130,7 @@ namespace ChatSystem.BLL.Services
                     Data = false
                 };
             }
-            medication = request.Adapt<Medication>();
+            request.Adapt(medication);
             await _medicationRepository.Update(medication);
             return new ApiResponce<bool>
             {
