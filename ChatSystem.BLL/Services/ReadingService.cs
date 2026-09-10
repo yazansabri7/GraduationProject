@@ -15,24 +15,38 @@ namespace ChatSystem.BLL.Services
     {
         private readonly IReadingRepository _readingRepository;
         private readonly IPatientRepository _patientRepository;
+        private readonly IDoctorPatientRepository _doctorPatientRepository;
 
-        public ReadingService(IReadingRepository readingRepository, IPatientRepository patientRepository)
+        public ReadingService(IReadingRepository readingRepository
+            , IPatientRepository patientRepository
+            ,IDoctorPatientRepository doctorPatientRepository)
         {
             _readingRepository = readingRepository;
             _patientRepository = patientRepository;
+            _doctorPatientRepository = doctorPatientRepository;
         }
 
-        public async Task<List<ReadingResponse>> GetReadingsAsync(int patientId)
+        public async Task<ApiResponce<List<ReadingResponse>>> GetReadingsAsync(int patientId)
         {
             var pateint = await _patientRepository.GetById(patientId);
 
             if (pateint is null)
             {
-                return null;
+                return new ApiResponce<List<ReadingResponse>>
+                {
+                    Data = null,
+                    Message = "Patient not found",
+                    Success = false
+                };
             }
             var readings = await _readingRepository.GetReadingsByPatientIdAsync(patientId);
 
-            return readings.Adapt<List<ReadingResponse>>();
+            return new ApiResponce<List<ReadingResponse>>
+            {
+                Data = readings.Adapt<List<ReadingResponse>>(),
+                Message = "Readings retrieved successfully",
+                Success = true
+            };
         }
         public async Task<ApiResponce<bool>> AddReadingAsync(ReadingRequest request, string userId)
         {
@@ -144,6 +158,38 @@ namespace ChatSystem.BLL.Services
             {
                 Data = true,
                 Message = "Reading deleted successfully",
+                Success = true
+            };
+        }
+
+        public async Task<ApiResponce<List<ReadingResponse>>> GetReadingForDoctorAsync(int patientId, string doctorUserId)
+        {
+            var isAssigned = await _doctorPatientRepository.IsDoctorAssignedToPatientAsync(doctorUserId, patientId);
+            if (!isAssigned)
+            {
+                return new ApiResponce<List<ReadingResponse>>
+                {
+                    Data = null,
+                    Message = "Doctor is not assigned to this patient",
+                    Success = false
+                };
+            }
+            var patient = await _patientRepository.GetById(patientId);
+            if(patient is null)
+            {
+                return new ApiResponce<List<ReadingResponse>>
+                {
+                    Data = null,
+                    Message = "Patient not found",
+                    Success = false
+                };
+            }
+            var readings = await _readingRepository.GetReadingsByPatientIdAsync(patientId);
+            var result = readings.Adapt<List<ReadingResponse>>();
+            return new ApiResponce<List<ReadingResponse>>
+            {
+                Data = result,
+                Message = "Readings retrieved successfully",
                 Success = true
             };
         }
