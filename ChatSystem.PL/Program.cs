@@ -37,15 +37,7 @@ builder.Services.AddSwaggerGen();
 
 // 1. Database Context
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlServerOptionsAction: sqlOptions =>
-        {
-            sqlOptions.EnableRetryOnFailure(
-                maxRetryCount: 5,
-                maxRetryDelay: TimeSpan.FromSeconds(30),
-                errorNumbersToAdd: null);
-        }));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));  
 
 // 2. Identity (Called ONCE here)
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
