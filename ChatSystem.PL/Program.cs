@@ -37,7 +37,9 @@ builder.Services.AddSwaggerGen();
 
 // 1. Database Context
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));  
+
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // 2. Identity (Called ONCE here)
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
