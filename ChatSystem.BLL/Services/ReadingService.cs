@@ -113,7 +113,7 @@ namespace ChatSystem.BLL.Services
                     Success = false
                 };
             }
-            var reading = await _readingRepository.GetById(readingId);
+            var reading = await _readingRepository.GetReadingByIdAsync(patientId.Value, readingId);
             if (reading is null)
             {
                 return new ApiResponce<bool>

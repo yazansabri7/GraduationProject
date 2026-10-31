@@ -8,7 +8,7 @@ namespace ChatSystem.DAL.Repository.Interfaces
     public interface IReadingRepository : IRepository<Reading>
     {
         Task<List<Reading>> GetReadingsByPatientIdAsync(int patientId);
-        Task<Reading?> GetReadingByIdAsync(int readingId);
+        Task<Reading?> GetReadingByIdAsync(int patientId, int readingId);
         Task<bool> DeleteReadingById(int readingId, int patientId);
     }
 }
