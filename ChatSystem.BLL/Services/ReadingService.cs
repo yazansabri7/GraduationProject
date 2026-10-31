@@ -26,11 +26,10 @@ namespace ChatSystem.BLL.Services
             _doctorPatientRepository = doctorPatientRepository;
         }
 
-        public async Task<ApiResponce<List<ReadingResponse>>> GetReadingsAsync(int patientId)
+        public async Task<ApiResponce<List<ReadingResponse>>> GetReadingsAsync( string userId)
         {
-            var pateint = await _patientRepository.GetById(patientId);
-
-            if (pateint is null)
+            var patientIdFromDb = await _patientRepository.getPatientIdByUserId(userId);
+            if (patientIdFromDb is null)
             {
                 return new ApiResponce<List<ReadingResponse>>
                 {
@@ -39,7 +38,7 @@ namespace ChatSystem.BLL.Services
                     Success = false
                 };
             }
-            var readings = await _readingRepository.GetReadingsByPatientIdAsync(patientId);
+            var readings = await _readingRepository.GetReadingsByPatientIdAsync(patientIdFromDb.Value);
 
             return new ApiResponce<List<ReadingResponse>>
             {
@@ -102,9 +101,19 @@ namespace ChatSystem.BLL.Services
 
         }
 
-        public async Task<ApiResponce<bool>> UpdateReadingAsync(UpdateReadingRequest request)
+        public async Task<ApiResponce<bool>> UpdateReadingAsync(UpdateReadingRequest request , string userId)
         {
-            var reading = await _readingRepository.GetReadingByIdAsync(request.Id);
+            var patientId = await _patientRepository.getPatientIdByUserId(userId);
+            if (patientId is null)
+            {
+                return new ApiResponce<bool>
+                {
+                    Data = false,
+                    Message = "Patient not found",
+                    Success = false
+                };
+            }
+            var reading = await _readingRepository.GetReadingByIdAsync(patientId.Value);
             if (reading is null)
             {
                 return new ApiResponce<bool>
@@ -141,9 +150,19 @@ namespace ChatSystem.BLL.Services
         }
 
 
-        public async Task<ApiResponce<bool>> DeleteReadingAsync(int readingId)
+        public async Task<ApiResponce<bool>> DeleteReadingAsync(string userId, int readingId)
         {
-            var reading = await _readingRepository.GetReadingByIdAsync(readingId);
+            var patientId = await _patientRepository.getPatientIdByUserId(userId);
+            if (patientId is null)
+            {
+                return new ApiResponce<bool>
+                {
+                    Data = false,
+                    Message = "Reading not found",
+                    Success = false
+                };
+            }
+            var reading = await _readingRepository.GetReadingsByPatientIdAsync(patientId.Value);
             if (reading is null)
             {
                 return new ApiResponce<bool>
@@ -153,7 +172,7 @@ namespace ChatSystem.BLL.Services
                     Success = false
                 };
             }
-            await _readingRepository.DeleteById(reading.Id);
+            await _readingRepository.DeleteReadingById(readingId ,patientId.Value);
             return new ApiResponce<bool>
             {
                 Data = true,
@@ -174,16 +193,7 @@ namespace ChatSystem.BLL.Services
                     Success = false
                 };
             }
-            var patient = await _patientRepository.GetById(patientId);
-            if(patient is null)
-            {
-                return new ApiResponce<List<ReadingResponse>>
-                {
-                    Data = null,
-                    Message = "Patient not found",
-                    Success = false
-                };
-            }
+            
             var readings = await _readingRepository.GetReadingsByPatientIdAsync(patientId);
             var result = readings.Adapt<List<ReadingResponse>>();
             return new ApiResponce<List<ReadingResponse>>

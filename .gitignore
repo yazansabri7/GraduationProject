@@ -5,3 +5,4 @@
 [Bb]in/
 **/appsettings.Production.json
 [Oo]bj/
+*.pubxml.user
