@@ -101,7 +101,7 @@ namespace ChatSystem.BLL.Services
 
         }
 
-        public async Task<ApiResponce<bool>> UpdateReadingAsync(UpdateReadingRequest request , string userId)
+        public async Task<ApiResponce<bool>> UpdateReadingAsync(UpdateReadingRequest request , string userId , int readingId)
         {
             var patientId = await _patientRepository.getPatientIdByUserId(userId);
             if (patientId is null)
@@ -113,7 +113,7 @@ namespace ChatSystem.BLL.Services
                     Success = false
                 };
             }
-            var reading = await _readingRepository.GetReadingByIdAsync(patientId.Value);
+            var reading = await _readingRepository.GetById(readingId);
             if (reading is null)
             {
                 return new ApiResponce<bool>
@@ -162,7 +162,7 @@ namespace ChatSystem.BLL.Services
                     Success = false
                 };
             }
-            var reading = await _readingRepository.GetReadingsByPatientIdAsync(patientId.Value);
+            var reading = await _readingRepository.GetById(readingId);
             if (reading is null)
             {
                 return new ApiResponce<bool>

@@ -28,7 +28,7 @@ namespace ChatSystem.PL.Areas.Patient.Controller
             {
                 return Unauthorized();
             }
-            var result = await _readingService.GetReadingsAsync( userId);
+            var result = await _readingService.GetReadingsAsync(userId);
             if (!result.Success)
             {
                 return BadRequest(result);
@@ -54,25 +54,25 @@ namespace ChatSystem.PL.Areas.Patient.Controller
 
             return Ok(result);
         }
-        [HttpPatch("my")]
+        [HttpPatch("my/{readingId}")]
         [Authorize(Roles = "Patient")]
-        public async Task<IActionResult> UpdateReading([FromBody] UpdateReadingRequest request)
+        public async Task<IActionResult> UpdateReading([FromBody] UpdateReadingRequest request , [FromRoute] int readingId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId is null)
             {
                 return Unauthorized();
             }
-            var result = await _readingService.UpdateReadingAsync(request , userId);
+            var result = await _readingService.UpdateReadingAsync(request , userId , readingId);
             if (!result.Success)
             {
                 return BadRequest(result);
             }
             return Ok(result);
         }
-        [HttpDelete("my")]
+        [HttpDelete("my/{readingId}")]
         [Authorize(Roles = "Patient")]
-        public async Task<IActionResult> DeleteReading(int readingId)
+        public async Task<IActionResult> DeleteReading([FromRoute] int readingId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId is null)
@@ -86,16 +86,16 @@ namespace ChatSystem.PL.Areas.Patient.Controller
             }
             return Ok(result);
         }
-        [HttpGet("patient/{id}")]
+        [HttpGet("patient/{patientId}")]
         [Authorize(Roles = "Doctor")]
-        public async Task<IActionResult> GetReadingForDoctor([FromRoute] int id)
+        public async Task<IActionResult> GetReadingForDoctor([FromRoute] int patientId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId is null)
             {
                 return Unauthorized(new { Message = "Unauthorized" });
             }
-            var result = await _readingService.GetReadingForDoctorAsync(id, userId);
+            var result = await _readingService.GetReadingForDoctorAsync(patientId, userId);
             if (!result.Success)
             {
                 return BadRequest(result);
