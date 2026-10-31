@@ -18,11 +18,16 @@ namespace ChatSystem.PL.Areas.Doctor.Controller
             _medicationService = medicationService;
         }
 
-        [HttpGet("{id}")]
-        [Authorize(Roles = "Doctor,Patient")]
-        public async Task<IActionResult> GetMedications([FromRoute] int id)
+        [HttpGet("my")]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> GetMedications()
         {
-            var result = await _medicationService.GetMedicationsByPatientIdAsync(id);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+            {
+                return BadRequest();
+            }
+            var result = await _medicationService.GetMedicationsByPatientIdAsync(userId);
             if (!result.Success)
             {
                 return BadRequest(result);
@@ -48,7 +53,13 @@ namespace ChatSystem.PL.Areas.Doctor.Controller
         [Authorize(Roles = "Doctor")]
         public async Task<IActionResult> DeleteMedication([FromRoute] int id)
         {
-            var result = await _medicationService.DeleteMedicationAsync(id);
+            var doctorUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(doctorUserId))
+            {
+                return Unauthorized(new { Success = false, Message = "Doctor user ID not found in claims." });
+            }
+
+            var result = await _medicationService.DeleteMedicationAsync(id , doctorUserId);
             if (!result.Success)
             {
                 return BadRequest(result);

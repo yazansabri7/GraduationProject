@@ -6,3 +6,4 @@
 **/appsettings.Production.json
 [Oo]bj/
 *.pubxml.user
+appsettings.Development.json
