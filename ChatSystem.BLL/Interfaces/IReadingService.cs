@@ -8,10 +8,10 @@ namespace ChatSystem.BLL.Interfaces
 {
     public interface IReadingService
     {
-        Task<ApiResponce<List<ReadingResponse>>> GetReadingsAsync(int patientId);
+        Task<ApiResponce<List<ReadingResponse>>> GetReadingsAsync(  string userId);
         Task<ApiResponce<bool>> AddReadingAsync(ReadingRequest request, string userId);
-        Task<ApiResponce<bool>> UpdateReadingAsync(UpdateReadingRequest request);
-        Task<ApiResponce<bool>> DeleteReadingAsync(int readingId);
+        Task<ApiResponce<bool>> UpdateReadingAsync(UpdateReadingRequest request, string userId);
+        Task<ApiResponce<bool>> DeleteReadingAsync(string userId, int readingId);
         Task<ApiResponce<List<ReadingResponse>>> GetReadingForDoctorAsync(int patientId, string doctorUserId);
     }
 }

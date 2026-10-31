@@ -28,12 +28,29 @@ namespace ChatSystem.DAL.Repository.Classes
                 .ToListAsync();
 
         }
-        public async Task<Reading> GetReadingByIdAsync(int readingId)
+        public async Task<Reading?> GetReadingByIdAsync(int readingId)
         {
             return await _context.Readings
                 .Include(r => r.GlucoseReading)
                 .Include(r => r.BloodPressure)
                 .FirstOrDefaultAsync(r => r.Id == readingId);
+        }
+
+        public async Task<bool> DeleteReadingById(int readingId, int patientId)
+        {
+            var reading = await _context.Readings
+                .FirstOrDefaultAsync(r =>
+                    r.Id == readingId &&
+                    r.PatientId == patientId);
+
+            if (reading is null)
+            {
+                return false;
+            }
+
+            _context.Readings.Remove(reading);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

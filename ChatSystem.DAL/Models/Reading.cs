@@ -6,6 +6,7 @@ namespace ChatSystem.DAL.Models
 {
     public class Reading : Entity
     {
+        public int Id { get; set; }
         public int PatientId { get; set; }
         public Patient Patient { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;

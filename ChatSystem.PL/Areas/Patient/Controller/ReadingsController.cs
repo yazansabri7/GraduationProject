@@ -19,11 +19,16 @@ namespace ChatSystem.PL.Areas.Patient.Controller
         {
             _readingService = readingService;
         }
-        [HttpGet("{id}")]
+        [HttpGet("my")]
         [Authorize(Roles = "Patient")]
-        public async Task<IActionResult> GetReadings([FromRoute] int id)
+        public async Task<IActionResult> GetReadings()
         {
-            var result = await _readingService.GetReadingsAsync(id);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+            {
+                return Unauthorized();
+            }
+            var result = await _readingService.GetReadingsAsync( userId);
             if (!result.Success)
             {
                 return BadRequest(result);
@@ -31,7 +36,7 @@ namespace ChatSystem.PL.Areas.Patient.Controller
 
             return Ok(result);
         }
-        [HttpPost]
+        [HttpPost("my")]
         [Authorize(Roles = "Patient")]
         public async Task<IActionResult> AddReading([FromBody] ReadingRequest request)
         {
@@ -49,22 +54,32 @@ namespace ChatSystem.PL.Areas.Patient.Controller
 
             return Ok(result);
         }
-        [HttpPatch]
+        [HttpPatch("my")]
         [Authorize(Roles = "Patient")]
         public async Task<IActionResult> UpdateReading([FromBody] UpdateReadingRequest request)
         {
-            var result = await _readingService.UpdateReadingAsync(request);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+            {
+                return Unauthorized();
+            }
+            var result = await _readingService.UpdateReadingAsync(request , userId);
             if (!result.Success)
             {
                 return BadRequest(result);
             }
             return Ok(result);
         }
-        [HttpDelete("{id}")]
+        [HttpDelete("my")]
         [Authorize(Roles = "Patient")]
-        public async Task<IActionResult> DeleteReading([FromRoute] int id)
+        public async Task<IActionResult> DeleteReading(int readingId)
         {
-            var result = await _readingService.DeleteReadingAsync(id);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+            {
+                return Unauthorized();
+            }
+            var result = await _readingService.DeleteReadingAsync(userId, readingId);
             if (!result.Success)
             {
                 return BadRequest(result);
@@ -75,12 +90,12 @@ namespace ChatSystem.PL.Areas.Patient.Controller
         [Authorize(Roles = "Doctor")]
         public async Task<IActionResult> GetReadingForDoctor([FromRoute] int id)
         {
-            var doctorId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (doctorId is null)
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
             {
                 return Unauthorized(new { Message = "Unauthorized" });
             }
-            var result = await _readingService.GetReadingForDoctorAsync(id, doctorId);
+            var result = await _readingService.GetReadingForDoctorAsync(id, userId);
             if (!result.Success)
             {
                 return BadRequest(result);
