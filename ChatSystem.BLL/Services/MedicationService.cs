@@ -1,12 +1,9 @@
-﻿using ChatSystem.BLL.Interfaces;
+using ChatSystem.BLL.Interfaces;
 using ChatSystem.DAL.Models;
 using ChatSystem.DAL.Repository.Interfaces;
 using ChatSystem.DTO.DtoRequests;
 using ChatSystem.DTO.DtoResponce;
 using Mapster;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ChatSystem.BLL.Services
 {
@@ -16,27 +13,22 @@ namespace ChatSystem.BLL.Services
         private readonly IPatientRepository _patientRepository;
         private readonly IDoctorPatientRepository _doctorPatientRepository;
 
-        public MedicationService(IMedicationRepository medicationRepository 
-            , IPatientRepository patientRepository
-            , IDoctorPatientRepository doctorPatientRepository)
+        public MedicationService(
+            IMedicationRepository medicationRepository,
+            IPatientRepository patientRepository,
+            IDoctorPatientRepository doctorPatientRepository)
         {
             _medicationRepository = medicationRepository;
             _patientRepository = patientRepository;
             _doctorPatientRepository = doctorPatientRepository;
         }
-        
+
         public async Task<ApiResponce<List<MedicationResponse>>> GetMedicationsByPatientIdAsync(string userId)
         {
             var patientId = await _patientRepository.getPatientIdByUserId(userId);
-            if(patientId is null)
-            {
-               return new ApiResponce<List<MedicationResponse>>
-               {
-                   Success = false,
-                   Message = "Patient not found.",
-                   Data = null
-               };
-            }
+            if (patientId is null)
+                return FailList<MedicationResponse>("Patient not found.");
+
             var medications = await _medicationRepository.GetMedicationsByPatientIdAsync(patientId.Value);
             return new ApiResponce<List<MedicationResponse>>
             {
@@ -45,264 +37,120 @@ namespace ChatSystem.BLL.Services
                 Data = medications.Adapt<List<MedicationResponse>>()
             };
         }
-        public async Task<ApiResponce<bool>> AddMedicationAsync(MedicationRequest request ,string doctorUserId)
+
+        public async Task<ApiResponce<List<MedicationAuditResponse>>> GetMyMedicationAuditAsync(string patientUserId)
         {
-            var patient = await _patientRepository.GetById(request.PatientId);
-            if(patient is null)
-            {
-                return new ApiResponce<bool>
-                {
-                    Success=false,
-                    Message="Patient Not Found",
-                    Data=false
-                };
-            }
-            var isAssigned = await _doctorPatientRepository.IsDoctorAssignedToPatientAsync(doctorUserId, request.PatientId);
-            if (!isAssigned)
-            {
-                return new ApiResponce<bool>
-                {
-                    Success = false,
-                    Message = "Doctor is not assigned to this patient.",
-                    Data = false
-                };
-            }
-            
-            var medication = request.Adapt<Medication>();
-            await _medicationRepository.Create(medication);
-            return new ApiResponce<bool>
+            var patientId = await _patientRepository.getPatientIdByUserId(patientUserId);
+            if (patientId is null)
+                return FailList<MedicationAuditResponse>("Patient not found.");
+
+            var logs = await _medicationRepository.GetAuditLogsByPatientIdAsync(patientId.Value);
+            return new ApiResponce<List<MedicationAuditResponse>>
             {
                 Success = true,
-                Message = "Medication added successfully.",
-                Data = true
+                Message = "Medication history retrieved successfully.",
+                Data = logs.Adapt<List<MedicationAuditResponse>>()
             };
         }
 
-        public async Task<ApiResponce<bool>> DeleteMedicationAsync(
-      int id,
-      string doctorUserId)
+        public async Task<ApiResponce<bool>> AddMedicationAsync(MedicationRequest request, string doctorUserId)
+        {
+            if (await _patientRepository.GetById(request.PatientId) is null)
+                return Fail("Patient not found.");
+
+            if (!await _doctorPatientRepository.IsDoctorAssignedToPatientAsync(doctorUserId, request.PatientId))
+                return Fail("Doctor is not assigned to this patient.");
+
+            var medication = request.Adapt<Medication>();
+            await _medicationRepository.CreateWithAuditAsync(medication, doctorUserId, "Doctor");
+            return Ok("Medication added successfully.");
+        }
+
+        public async Task<ApiResponce<bool>> DeleteMedicationAsync(int id, string doctorUserId)
         {
             var medication = await _medicationRepository.GetById(id);
-
             if (medication is null)
-            {
-                return new ApiResponce<bool>
-                {
-                    Success = false,
-                    Message = "Medication not found.",
-                    Data = false
-                };
-            }
+                return Fail("Medication not found.");
 
-            var isAssigned = await _doctorPatientRepository
-                .IsDoctorAssignedToPatientAsync(doctorUserId, medication.PatientId);
+            if (!await _doctorPatientRepository.IsDoctorAssignedToPatientAsync(doctorUserId, medication.PatientId))
+                return Fail("Doctor is not assigned to this patient.");
 
-            if (!isAssigned)
-            {
-                return new ApiResponce<bool>
-                {
-                    Success = false,
-                    Message = "Doctor is not assigned to this patient.",
-                    Data = false
-                };
-            }
-
-            await _medicationRepository.DeleteById(medication.Id);
-
-            return new ApiResponce<bool>
-            {
-                Success = true,
-                Message = "Medication deleted successfully.",
-                Data = true
-            };
+            var deleted = await _medicationRepository.DeleteWithAuditAsync(
+                id, medication.PatientId, doctorUserId, "Doctor");
+            return deleted ? Ok("Medication deleted successfully.") : Fail("Medication not found.");
         }
 
         public async Task<ApiResponce<bool>> UpdateMedicationAsync(
-            int id,
-            MedicationRequest request,
-            string doctorUserId)
+            int id, MedicationRequest request, string doctorUserId)
         {
             var medication = await _medicationRepository.GetById(id);
-
             if (medication is null)
-            {
-                return new ApiResponce<bool>
-                {
-                    Success = false,
-                    Message = "Medication not found.",
-                    Data = false
-                };
-            }
+                return Fail("Medication not found.");
 
-            var isAssigned = await _doctorPatientRepository
-                .IsDoctorAssignedToPatientAsync(
-                    doctorUserId,
-                    medication.PatientId
-                );
+            if (!await _doctorPatientRepository.IsDoctorAssignedToPatientAsync(doctorUserId, medication.PatientId))
+                return Fail("Doctor is not assigned to this patient.");
 
-            if (!isAssigned)
-            {
-                return new ApiResponce<bool>
-                {
-                    Success = false,
-                    Message = "Doctor is not assigned to this patient.",
-                    Data = false
-                };
-            }
-
-            // Prevent changing the medication's patient
             if (request.PatientId != medication.PatientId)
-            {
-                return new ApiResponce<bool>
-                {
-                    Success = false,
-                    Message = "Cannot change medication patient.",
-                    Data = false
-                };
-            }
+                return Fail("Cannot change medication patient.");
 
-            request.Adapt(medication);
-
-            await _medicationRepository.Update(medication);
-
-            return new ApiResponce<bool>
-            {
-                Success = true,
-                Message = "Medication updated successfully.",
-                Data = true
-            };
+            request.Adapt(medication); // audit properties are ignored by TypeAdapterConfig
+            await _medicationRepository.UpdateWithAuditAsync(medication, doctorUserId, "Doctor");
+            return Ok("Medication updated successfully.");
         }
 
-        public async Task<ApiResponce<bool>> AddMedicationForPatientAsync(PatientMedicationRequest request, string patientUserId)
+        public async Task<ApiResponce<bool>> AddMedicationForPatientAsync(
+            PatientMedicationRequest request, string patientUserId)
         {
-            try
-            {
-                var patientId = await _patientRepository.getPatientIdByUserId(patientUserId);
-                if(patientId is null)
-                {
-                    return new ApiResponce<bool>
-                    {
-                        Success = false,
-                        Message = "Patient not found.",
-                        Data = false
-                    };
-                }
-                var medication = new Medication
-                {
-                    Name = request.Name,
-                    Dosage = request.Dosage,
-                    Frequency = request.Frequency,
-                    PatientId = patientId.Value
-                };
-                await _medicationRepository.Create(medication);
-                return new ApiResponce<bool>
-                {
-                    Success = true,
-                    Message = "Medication added successfully.",
-                    Data = true
-                };
-            }
-            catch (Exception error)
-            {
-                return new ApiResponce<bool>
-                {
-                    Success = false,
-                    Message = $"An error occurred: {error.Message}",
-                    Data = false
-                };
-            }
+            var patientId = await _patientRepository.getPatientIdByUserId(patientUserId);
+            if (patientId is null)
+                return Fail("Patient not found.");
+
+            var medication = request.Adapt<Medication>();
+            medication.PatientId = patientId.Value; // never trust this ID from the request
+            await _medicationRepository.CreateWithAuditAsync(medication, patientUserId, "Patient");
+            return Ok("Medication added successfully.");
         }
 
         public async Task<ApiResponce<bool>> UpdateMyMedicationAsync(
-    int id,
-    PatientMedicationRequest request,
-    string userId)
+            int id, PatientMedicationRequest request, string patientUserId)
         {
-            var patientId = await _patientRepository
-                .getPatientIdByUserId(userId);
-
+            var patientId = await _patientRepository.getPatientIdByUserId(patientUserId);
             if (patientId is null)
-            {
-                return new ApiResponce<bool>
-                {
-                    Success = false,
-                    Message = "Patient not found.",
-                    Data = false
-                };
-            }
+                return Fail("Patient not found.");
 
             var medication = await _medicationRepository.GetById(id);
-
             if (medication is null || medication.PatientId != patientId.Value)
-            {
-                return new ApiResponce<bool>
-                {
-                    Success = false,
-                    Message = "Medication not found.",
-                    Data = false
-                };
-            }
+                return Fail("Medication not found.");
 
-            medication.Name = request.Name;
-            medication.Dosage = request.Dosage;
-            medication.Frequency = request.Frequency;
-
-            await _medicationRepository.Update(medication);
-
-            return new ApiResponce<bool>
-            {
-                Success = true,
-                Message = "Medication updated successfully.",
-                Data = true
-            };
+            request.Adapt(medication); // PatientId and all audit fields are ignored
+            await _medicationRepository.UpdateWithAuditAsync(medication, patientUserId, "Patient");
+            return Ok("Medication updated successfully.");
         }
-        public async Task<ApiResponce<bool>> DeleteMyMedicationAsync(
-    int id,
-    string userId)
+
+        public async Task<ApiResponce<bool>> DeleteMyMedicationAsync(int id, string patientUserId)
         {
-            var patientId = await _patientRepository
-                .getPatientIdByUserId(userId);
-
+            var patientId = await _patientRepository.getPatientIdByUserId(patientUserId);
             if (patientId is null)
-            {
-                return new ApiResponce<bool>
-                {
-                    Success = false,
-                    Message = "Patient not found.",
-                    Data = false
-                };
-            }
+                return Fail("Patient not found.");
 
-            var medication = await _medicationRepository.GetById(id);
-
-            if (medication is null || medication.PatientId != patientId.Value)
-            {
-                return new ApiResponce<bool>
-                {
-                    Success = false,
-                    Message = "Medication not found.",
-                    Data = false
-                };
-            }
-
-            var deleted = await _medicationRepository.DeleteById(id);
-
-            if (!deleted)
-            {
-                return new ApiResponce<bool>
-                {
-                    Success = false,
-                    Message = "Medication could not be deleted.",
-                    Data = false
-                };
-            }
-
-            return new ApiResponce<bool>
-            {
-                Success = true,
-                Message = "Medication deleted successfully.",
-                Data = true
-            };
+            var deleted = await _medicationRepository.DeleteWithAuditAsync(
+                id, patientId.Value, patientUserId, "Patient");
+            return deleted ? Ok("Medication deleted successfully.") : Fail("Medication not found.");
         }
+
+        private static ApiResponce<bool> Ok(string message) => new()
+        {
+            Success = true, Message = message, Data = true
+        };
+
+        private static ApiResponce<bool> Fail(string message) => new()
+        {
+            Success = false, Message = message, Data = false
+        };
+
+        private static ApiResponce<List<T>> FailList<T>(string message) => new()
+        {
+            Success = false, Message = message, Data = null
+        };
     }
 }

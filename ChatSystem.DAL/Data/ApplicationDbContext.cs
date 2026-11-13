@@ -1,11 +1,7 @@
-﻿using ChatSystem.DAL.Models;
+using ChatSystem.DAL.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Reflection.Emit;
-using System.Text;
 
 namespace ChatSystem.DAL.Data
 {
@@ -20,14 +16,13 @@ namespace ChatSystem.DAL.Data
         public DbSet<BloodPressure> BloodPressures { get; set; }
         public DbSet<GlucoseReading> GlucoseReadings { get; set; }
         public DbSet<Medication> Medications { get; set; }
+        public DbSet<MedicationAuditLog> MedicationAuditLogs { get; set; }
         public DbSet<Alert> Alerts { get; set; }
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        {
-        }
+
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-
             base.OnModelCreating(builder);
             builder.Entity<ApplicationUser>().ToTable("Users");
             builder.Entity<IdentityRole>().ToTable("Roles");
@@ -37,12 +32,11 @@ namespace ChatSystem.DAL.Data
             builder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims");
             builder.Entity<IdentityUserToken<string>>().ToTable("UserTokens");
 
-
-           builder.Entity<DoctorPatient>()
+            builder.Entity<DoctorPatient>()
                 .HasOne(dp => dp.Patient)
                 .WithMany(p => p.DoctorPatients)
                 .HasForeignKey(dp => dp.PatientId)
-                .OnDelete(DeleteBehavior.Restrict); 
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<DoctorPatient>()
                 .HasOne(dp => dp.Doctor)
@@ -62,7 +56,27 @@ namespace ChatSystem.DAL.Data
                 .HasForeignKey(m => m.ChatId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.Entity<Medication>()
+                .HasOne(m => m.CreatedByUser)
+                .WithMany()
+                .HasForeignKey(m => m.CreatedByUserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Medication>()
+                .HasOne(m => m.UpdatedByUser)
+                .WithMany()
+                .HasForeignKey(m => m.UpdatedByUserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<MedicationAuditLog>()
+                .Property(log => log.Action)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
+            builder.Entity<MedicationAuditLog>()
+                .HasIndex(log => new { log.PatientId, log.OccurredAt });
+            builder.Entity<MedicationAuditLog>()
+                .HasIndex(log => new { log.MedicationId, log.OccurredAt });
         }
-      
     }
 }
