@@ -172,5 +172,137 @@ namespace ChatSystem.BLL.Services
                 Data = true
             };
         }
+
+        public async Task<ApiResponce<bool>> AddMedicationForPatientAsync(PatientMedicationRequest request, string patientUserId)
+        {
+            try
+            {
+                var patientId = await _patientRepository.getPatientIdByUserId(patientUserId);
+                if(patientId is null)
+                {
+                    return new ApiResponce<bool>
+                    {
+                        Success = false,
+                        Message = "Patient not found.",
+                        Data = false
+                    };
+                }
+                var medication = new Medication
+                {
+                    Name = request.Name,
+                    Dosage = request.Dosage,
+                    Frequency = request.Frequency,
+                    PatientId = patientId.Value
+                };
+                await _medicationRepository.Create(medication);
+                return new ApiResponce<bool>
+                {
+                    Success = true,
+                    Message = "Medication added successfully.",
+                    Data = true
+                };
+            }
+            catch (Exception error)
+            {
+                return new ApiResponce<bool>
+                {
+                    Success = false,
+                    Message = $"An error occurred: {error.Message}",
+                    Data = false
+                };
+            }
+        }
+
+        public async Task<ApiResponce<bool>> UpdateMyMedicationAsync(
+    int id,
+    PatientMedicationRequest request,
+    string userId)
+        {
+            var patientId = await _patientRepository
+                .getPatientIdByUserId(userId);
+
+            if (patientId is null)
+            {
+                return new ApiResponce<bool>
+                {
+                    Success = false,
+                    Message = "Patient not found.",
+                    Data = false
+                };
+            }
+
+            var medication = await _medicationRepository.GetById(id);
+
+            if (medication is null || medication.PatientId != patientId.Value)
+            {
+                return new ApiResponce<bool>
+                {
+                    Success = false,
+                    Message = "Medication not found.",
+                    Data = false
+                };
+            }
+
+            medication.Name = request.Name;
+            medication.Dosage = request.Dosage;
+            medication.Frequency = request.Frequency;
+
+            await _medicationRepository.Update(medication);
+
+            return new ApiResponce<bool>
+            {
+                Success = true,
+                Message = "Medication updated successfully.",
+                Data = true
+            };
+        }
+        public async Task<ApiResponce<bool>> DeleteMyMedicationAsync(
+    int id,
+    string userId)
+        {
+            var patientId = await _patientRepository
+                .getPatientIdByUserId(userId);
+
+            if (patientId is null)
+            {
+                return new ApiResponce<bool>
+                {
+                    Success = false,
+                    Message = "Patient not found.",
+                    Data = false
+                };
+            }
+
+            var medication = await _medicationRepository.GetById(id);
+
+            if (medication is null || medication.PatientId != patientId.Value)
+            {
+                return new ApiResponce<bool>
+                {
+                    Success = false,
+                    Message = "Medication not found.",
+                    Data = false
+                };
+            }
+
+            var deleted = await _medicationRepository.DeleteById(id);
+
+            if (!deleted)
+            {
+                return new ApiResponce<bool>
+                {
+                    Success = false,
+                    Message = "Medication could not be deleted.",
+                    Data = false
+                };
+            }
+
+            return new ApiResponce<bool>
+            {
+                Success = true,
+                Message = "Medication deleted successfully.",
+                Data = true
+            };
+        }
     }
 }

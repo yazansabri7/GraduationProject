@@ -82,6 +82,62 @@ namespace ChatSystem.PL.Areas.Doctor.Controller
             }
             return Ok(result);
         }
+        [HttpPost("my")]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> AddMedicationForPatient([FromBody] PatientMedicationRequest request)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new { Success = false, Message = "Patient user ID not found in claims." });
+            }
+            var result = await _medicationService.AddMedicationForPatientAsync(request, userId);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+        [HttpPatch("my/{id}")]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> UpdateMyMedication([FromRoute] int id,
+    [FromBody] PatientMedicationRequest request)
+
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var result = await _medicationService
+                .UpdateMyMedicationAsync(id, request, userId);
+
+            if (!result.Success)
+            {
+
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+        [HttpDelete("my/{id}")]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> DeleteMyMedication(
+    [FromRoute] int id)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var result = await _medicationService
+                .DeleteMyMedicationAsync(id, userId);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
 
     }
 }
