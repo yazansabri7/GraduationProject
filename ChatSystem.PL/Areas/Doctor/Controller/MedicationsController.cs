@@ -25,7 +25,7 @@ namespace ChatSystem.PL.Areas.Doctor.Controller
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId is null)
             {
-                return BadRequest();
+                return Unauthorized();
             }
             var result = await _medicationService.GetMedicationsByPatientIdAsync(userId);
             if (!result.Success)
