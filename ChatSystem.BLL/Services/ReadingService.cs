@@ -152,18 +152,23 @@ namespace ChatSystem.BLL.Services
 
         public async Task<ApiResponce<bool>> DeleteReadingAsync(string userId, int readingId)
         {
-            var patientId = await _patientRepository.getPatientIdByUserId(userId);
+            var patientId = await _patientRepository
+                .getPatientIdByUserId(userId);
+
             if (patientId is null)
             {
                 return new ApiResponce<bool>
                 {
                     Data = false,
-                    Message = "Reading not found",
+                    Message = "Patient not found",
                     Success = false
                 };
             }
-            var reading = await _readingRepository.GetById(readingId);
-            if (reading is null)
+
+            var deleted = await _readingRepository
+                .DeleteReadingById(readingId, patientId.Value);
+
+            if (!deleted)
             {
                 return new ApiResponce<bool>
                 {
@@ -172,7 +177,7 @@ namespace ChatSystem.BLL.Services
                     Success = false
                 };
             }
-            await _readingRepository.DeleteReadingById(readingId ,patientId.Value);
+
             return new ApiResponce<bool>
             {
                 Data = true,
