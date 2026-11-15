@@ -11,6 +11,7 @@ namespace ChatSystem.DAL.Models
         public ApplicationUser User { get; set; }
         public string Certificate { get; set; }
         public List<DoctorPatient> DoctorPatients { get; set; }
+        public bool IsAvailable { get; set; } = true;
 
     }
 }

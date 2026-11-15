@@ -17,6 +17,41 @@ namespace ChatSystem.BLL.Services
         {
             _doctorRepository = doctorRepository;
         }
+
+        public Task<ApiResponce<IEnumerable<DoctorResponse>>> GetAvailableDoctorsAsync()
+        {
+            try
+            {
+                var doctors = _doctorRepository.GetAvailableDoctorsAsync().Result;
+                var doctorResponses = new List<DoctorResponse>();
+                foreach (var doctor in doctors)
+                {
+                    var doctorResponse = new DoctorResponse
+                    {
+                        Id = doctor.Id,
+                        DoctorName = doctor.User.FullName,
+                        ProfileImage = doctor.User.ProfilePicture,
+                        IsAvailable = doctor.IsAvailable
+                    };
+                    doctorResponses.Add(doctorResponse);
+                }
+                return Task.FromResult(new ApiResponce<IEnumerable<DoctorResponse>>
+                {
+                    Success = true,
+                    Message = "Available doctors retrieved successfully.",
+                    Data = doctorResponses
+                });
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult(new ApiResponce<IEnumerable<DoctorResponse>>
+                {
+                    Success = false,
+                    Message = $"An error occurred while retrieving available doctors: {ex.Message}"
+                });
+            }
+        }
+
         public async Task<ApiResponce<int>> GetDoctorIdByUserId(string userId)
         {
             var doctorId = await _doctorRepository.getDoctorIdByUserId(userId);
