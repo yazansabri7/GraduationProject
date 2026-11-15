@@ -9,5 +9,5 @@ namespace ChatSystem.DAL.Repository.Interfaces
     {
         Task<int?> getPatientIdByUserId(string userId);
         Task<string?>getUserIdBypatientId(int patientId);
-    }
+     }
 }
