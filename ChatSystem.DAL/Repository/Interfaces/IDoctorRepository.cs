@@ -9,5 +9,6 @@ namespace ChatSystem.DAL.Repository.Interfaces
     {
         Task<int?> getDoctorIdByUserId(string userId);
         Task<string?> getUserIdByDoctorId(int doctorId);
+        Task<IEnumerable<Doctor>> GetAvailableDoctorsAsync();
     }
 }

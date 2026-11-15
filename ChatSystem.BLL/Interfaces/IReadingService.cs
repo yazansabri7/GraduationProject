@@ -10,7 +10,7 @@ namespace ChatSystem.BLL.Interfaces
     {
         Task<ApiResponce<List<ReadingResponse>>> GetReadingsAsync(  string userId);
         Task<ApiResponce<bool>> AddReadingAsync(ReadingRequest request, string userId);
-        Task<ApiResponce<bool>> UpdateReadingAsync(UpdateReadingRequest request, string userId);
+        Task<ApiResponce<bool>> UpdateReadingAsync(UpdateReadingRequest request, string userId , int readingId);
         Task<ApiResponce<bool>> DeleteReadingAsync(string userId, int readingId);
         Task<ApiResponce<List<ReadingResponse>>> GetReadingForDoctorAsync(int patientId, string doctorUserId);
     }

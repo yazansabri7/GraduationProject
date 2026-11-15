@@ -17,23 +17,13 @@ namespace ChatSystem.DAL.Repository.Classes
             _context = context;
         }
 
-        public async Task<List<Reading>> GetReadingsByPatientIdAsync(int patientId)
-        {
-            var patient = await _context.Patients.FindAsync(patientId);
-            if (patient == null) { return null; }
-            return await _context.Readings.Include(r => r.GlucoseReading)
-                .Include(r => r.BloodPressure)
-                .Where(r => r.PatientId == patientId)
-                .OrderByDescending(r => r.Timestamp)
-                .ToListAsync();
-
-        }
-        public async Task<Reading?> GetReadingByIdAsync(int readingId)
+       
+        public async Task<Reading?> GetReadingByIdAsync(int patientId, int readingId)
         {
             return await _context.Readings
                 .Include(r => r.GlucoseReading)
                 .Include(r => r.BloodPressure)
-                .FirstOrDefaultAsync(r => r.Id == readingId);
+                .FirstOrDefaultAsync(r => r.Id == readingId && r.PatientId == patientId);
         }
 
         public async Task<bool> DeleteReadingById(int readingId, int patientId)
@@ -52,5 +42,16 @@ namespace ChatSystem.DAL.Repository.Classes
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<List<Reading>> GetReadingsByPatientIdAsync(int patientId)
+        {
+            return await _context.Readings
+                .Include(r => r.GlucoseReading)
+                .Include(r => r.BloodPressure)
+                .Where(r => r.PatientId == patientId)
+                .ToListAsync();
+        }
+
+
     }
 }

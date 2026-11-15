@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ChatSystem.BLL.Interfaces;
 
 namespace ChatSystem.PL.Areas.Doctor.Controller
 {
@@ -10,5 +11,11 @@ namespace ChatSystem.PL.Areas.Doctor.Controller
     [Authorize(Roles = "Doctor")]
     public class DoctorController : ControllerBase
     {
+        private readonly IDoctorServices _doctorServices;
+        public DoctorController(IDoctorServices doctorServices)
+        {
+            _doctorServices = doctorServices;
+        }
+        
     }
 }

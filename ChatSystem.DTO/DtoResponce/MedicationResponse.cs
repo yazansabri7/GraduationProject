@@ -9,7 +9,11 @@ namespace ChatSystem.DTO.DtoResponce
     {
         public int Id { get; set; }
         public int PatientId { get; set; }
-        public string DoctorName { get; set; }
+        public string CreatedBy { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string? UpdatedBy { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+
         public string PatientName { get; set; }
         public string Name { get; set; }
         public string Dosage { get; set; }

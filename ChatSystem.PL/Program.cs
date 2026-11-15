@@ -24,9 +24,11 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy =>
                       {
-                          policy.AllowAnyOrigin()
-                          .AllowAnyMethod()
-                          .AllowAnyHeader();
+                          policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
                       });
 });
 
@@ -37,6 +39,7 @@ builder.Services.AddSwaggerGen();
 
 // 1. Database Context
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
+
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 

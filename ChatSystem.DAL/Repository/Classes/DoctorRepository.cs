@@ -18,6 +18,14 @@ namespace ChatSystem.DAL.Repository.Classes
             _context = context;
         }
 
+        public async Task<IEnumerable<Doctor>> GetAvailableDoctorsAsync()
+        {
+            return await _context.Doctors.AsNoTracking().
+                Include(d => d.User).
+                Where(d => d.IsAvailable).ToListAsync()
+                ;
+        }
+
         public async Task<int?> getDoctorIdByUserId(string userId)
         {
 
