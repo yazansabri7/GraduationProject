@@ -10,6 +10,7 @@ namespace ChatSystem.DTO.DtoResponce
         public int Id { get; set; }
         public int DoctorId { get; set; }
         public int PatientId { get; set; }
+        public string FullName { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }

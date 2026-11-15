@@ -24,7 +24,13 @@ namespace ChatSystem.DAL.Repository.Classes
 
         public async Task<List<Chat>> GetByDoctorIdAsync(int doctorId)
         {
-            return await _context.Chats.Where(c=>c.DoctorId == doctorId).ToListAsync();
+            return await _context.Chats
+        .AsNoTracking()
+        .Where(c => c.DoctorId == doctorId)
+        .Include(c => c.DoctorPatient)
+            .ThenInclude(dp => dp.Patient)
+                .ThenInclude(p => p.User)
+        .ToListAsync();
         }
 
         public async Task<Chat?> GetByDoctorPatientAsync(int doctorId, int patientId)
@@ -39,8 +45,13 @@ namespace ChatSystem.DAL.Repository.Classes
 
         public async Task<List<Chat>> GetByPatientIdAsync(int patientId)
         {
-            var list=await _context.Chats.AsNoTracking().Where(c=>c.PatientId == patientId).ToListAsync();
-            return list;
+            return await _context.Chats
+        .AsNoTracking()
+        .Where(c => c.PatientId == patientId)
+        .Include(c => c.DoctorPatient)
+            .ThenInclude(dp => dp.Doctor)
+                .ThenInclude(d => d.User)
+        .ToListAsync();
         }
     }
 }
