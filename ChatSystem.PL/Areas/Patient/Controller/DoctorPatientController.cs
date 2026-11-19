@@ -33,7 +33,7 @@ namespace ChatSystem.PL.Areas.Patient.Controller
             {
                 return NotFound(patientResponse);
             }
-            var result = await _dctorPatientServices.AddDoctorPatientAsync(doctorId, patientResponse.Data);
+            var result = await _dctorPatientServices.AddDoctorPatientAsync(doctorId, patientResponse.Data, userId);
             return Ok(result);
         }
     }

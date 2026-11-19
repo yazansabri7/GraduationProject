@@ -25,6 +25,7 @@ namespace ChatSystem.DAL.Repository.Classes
 
         public async Task<DoctorPatient?> GetByDoctorPatientAsync(int doctorId, int patientId)
         {
+            
             var doctorPatient = await _context.DoctorPatients.FirstOrDefaultAsync(dp => dp.DoctorId == doctorId && dp.PatientId == patientId);
             return doctorPatient;
         }

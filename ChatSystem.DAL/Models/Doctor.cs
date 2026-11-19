@@ -12,6 +12,8 @@ namespace ChatSystem.DAL.Models
         public string Certificate { get; set; }
         public List<DoctorPatient> DoctorPatients { get; set; }
         public bool IsAvailable { get; set; } = true;
+        public int ActivePatientsCount { get; set; } = 0;
+        public int MaxPatients { get; set; } = 20;
 
     }
 }

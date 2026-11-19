@@ -14,6 +14,7 @@ namespace ChatSystem.DAL.Data
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public readonly IHttpContextAccessor _httpContextAccessor;
+        public DbSet<Notification> Notifications { get; set; }
         public DbSet<Doctor> Doctors { get; set; }
         public DbSet<Chat> Chats { get; set; }
         public DbSet<Message> Messages { get; set; }
@@ -42,8 +43,12 @@ namespace ChatSystem.DAL.Data
             builder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims");
             builder.Entity<IdentityUserToken<string>>().ToTable("UserTokens");
 
-
-           builder.Entity<DoctorPatient>()
+            builder.Entity<Medication>()
+    .HasOne(m => m.User)
+    .WithMany()
+    .HasForeignKey(m => m.CreatedBy)
+    .OnDelete(DeleteBehavior.NoAction);
+            builder.Entity<DoctorPatient>()
                 .HasOne(dp => dp.Patient)
                 .WithMany(p => p.DoctorPatients)
                 .HasForeignKey(dp => dp.PatientId)
@@ -54,6 +59,10 @@ namespace ChatSystem.DAL.Data
                 .WithMany(d => d.DoctorPatients)
                 .HasForeignKey(dp => dp.DoctorId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Doctor>()
+                .Property(d => d.MaxPatients)
+                .HasDefaultValue(20);
 
             builder.Entity<Chat>()
                 .HasOne(c => c.DoctorPatient)
@@ -66,6 +75,36 @@ namespace ChatSystem.DAL.Data
                 .WithMany(c => c.Messages)
                 .HasForeignKey(m => m.ChatId)
                 .OnDelete(DeleteBehavior.Cascade);
+            builder.Entity<Notification>(entity =>
+            {
+                // Recipient relationship
+                entity.HasOne(n => n.User)
+                    .WithMany()
+                    .HasForeignKey(n => n.UserId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                // Actor relationship
+                entity.HasOne(n => n.ActorUser)
+                    .WithMany()
+                    .HasForeignKey(n => n.ActorUserId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                entity.Property(n => n.Title)
+                    .HasMaxLength(150)
+                    .IsRequired();
+
+                entity.Property(n => n.Message)
+                    .HasMaxLength(500)
+                    .IsRequired();
+
+                entity.HasIndex(n => new
+                {
+                    n.UserId,
+                    n.CreatedAt,
+                    n.Id
+                })
+                .IsDescending(false, true, true);
+            });
 
         }
 

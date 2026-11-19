@@ -17,6 +17,20 @@ namespace ChatSystem.DAL.Repository.Classes
         {
             _context = context;
         }
+        public async Task<bool> TryIncrementPatientCountAsync(int doctorId)
+        {
+            var affectedRows = await _context.Doctors
+                .Where(d =>
+                    d.Id == doctorId &&
+                    d.IsAvailable &&
+                    d.ActivePatientsCount < d.MaxPatients)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(
+                        d => d.ActivePatientsCount,
+                        d => d.ActivePatientsCount + 1));
+
+            return affectedRows == 1;
+        }
 
         public async Task<IEnumerable<Doctor>> GetAvailableDoctorsAsync()
         {

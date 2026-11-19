@@ -125,6 +125,9 @@ builder.Services.AddScoped<IReadingRepository, ReadingRepository>();
 builder.Services.AddScoped<IReadingService, ReadingService>();
 builder.Services.AddScoped<IMedicationRepository, MedicationRepository>();
 builder.Services.AddScoped<IMedicationService, MedicationService>();
+builder.Services.AddScoped< INotificationService,NotificationService>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationSender,SignalRNotificationSender>();
 builder.Services.AddSignalR();
 
 
@@ -163,5 +166,6 @@ using (var scope = app.Services.CreateScope())
 
 app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat");
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.Run();

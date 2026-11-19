@@ -54,6 +54,7 @@ namespace ChatSystem.BLL.Services
         public async Task<ApiResponce<List<ChatResponce>>> GetByDoctorIdAsync(int doctorId)
         {
             var chats = await _chatRepository.GetByDoctorIdAsync(doctorId);
+           
 
             return new ApiResponce<List<ChatResponce>>
             {
