@@ -24,13 +24,15 @@ namespace ChatSystem.BLL.Services
         private readonly IEmailSender _emailSender;
         private readonly IPatientRepository _patientRepository;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IFileService _fileService;
 
         public AuthService(UserManager<ApplicationUser> userManager
             , IJwtService jwtService, IDoctorRepository doctorRepository
             , IUnitOfWork unitOfWork
             ,IEmailSender emailSender
             ,IPatientRepository patientRepository
-            ,SignInManager<ApplicationUser> signInManager)
+            ,SignInManager<ApplicationUser> signInManager
+            ,IFileService fileService)
         {
             _jwtService = jwtService;
             _userManager = userManager;
@@ -39,6 +41,7 @@ namespace ChatSystem.BLL.Services
             _emailSender = emailSender;
             _patientRepository = patientRepository;
             _signInManager = signInManager;
+            _fileService = fileService;
         }
         public async Task<LoginResponse> Login(LoginRequest loginDto)
         {
@@ -343,6 +346,63 @@ namespace ChatSystem.BLL.Services
             {
                 Success = true,
                 Message = "Password reset successfully"
+            };
+        }
+
+        public async Task<ApiResponce<bool>> UploadProfilePictureAsync(IFormFile file, string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if(user is null)
+            {
+                return new ApiResponce<bool>
+                {
+                    Success = false,
+                    Message = "User not found"
+                };
+            }
+            if(file is null || file.Length == 0)
+            {
+                return new ApiResponce<bool>
+                {
+                    Success = false,
+                    Message = "File is empty"
+                };
+            }
+            user.ProfilePicture = await _fileService.UploadAsync(file, "ProfilePictures");
+            await _userManager.UpdateAsync(user);
+            return new ApiResponce<bool>
+            {
+                Success = true,
+                Message = "Profile picture uploaded successfully"
+            };
+        }
+
+        public async Task<ApiResponce<bool>> DeleteProfilePictureAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+            {
+                return new ApiResponce<bool>
+                {
+                    Success = false,
+                    Message = "User not found"
+                };
+            }
+            if (string.IsNullOrEmpty(user.ProfilePicture))
+            {
+                return new ApiResponce<bool>
+                {
+                    Success = false,
+                    Message = "No profile picture to delete"
+                };
+            }
+            await _fileService.DeleteAsync("ProfilePictures", user.ProfilePicture);
+            user.ProfilePicture = null;
+            await _userManager.UpdateAsync(user);
+            return new ApiResponce<bool>
+            {
+                Success = true,
+                Message = "Profile picture deleted successfully"
             };
         }
     }

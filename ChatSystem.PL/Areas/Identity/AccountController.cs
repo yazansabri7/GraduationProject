@@ -3,6 +3,7 @@ using ChatSystem.DTO.DtoRequests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ChatSystem.PL.Areas.Identity
 {
@@ -77,6 +78,38 @@ namespace ChatSystem.PL.Areas.Identity
                 return BadRequest(result);
             }
             return Ok(result);
+        }
+        [HttpPost("ProfilePicture")]
+        [Authorize]
+        public async Task<IActionResult> UploadProfilePicture([FromForm] UploadProfilePictureRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            var response = await _authService.UploadProfilePictureAsync(request.File, userId);
+            if(!response.Success)
+            {
+                return BadRequest("Failed to upload profile picture");
+            }
+            return Ok(response);
+        }
+        [HttpDelete("ProfilePicture")]
+        [Authorize]
+        public async Task<IActionResult> DeleteProfilePicture()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            var response = await _authService.DeleteProfilePictureAsync(userId);
+            if (!response.Success)
+            {
+                return BadRequest("Failed to delete profile picture");
+            }
+            return Ok(response);
         }
     }
 }

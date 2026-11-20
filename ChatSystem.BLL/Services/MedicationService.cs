@@ -208,7 +208,8 @@ namespace ChatSystem.BLL.Services
                 {
                     Success = false,
                     Message = $"An error occurred: {error.Message}",
-                    Data = false
+                    Data = false,
+                    Errors = new List<string> { error.StackTrace }
                 };
             }
         }
