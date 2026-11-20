@@ -104,6 +104,7 @@ builder.Services.AddOpenApi();
 
 // 4. DI / Repositories & Services
 builder.Services.AddScoped<ISeedData, RoleSeedData>();
+builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<ISeedData, UserSeedData>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();

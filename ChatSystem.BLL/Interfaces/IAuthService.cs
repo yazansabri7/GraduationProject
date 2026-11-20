@@ -18,5 +18,7 @@ namespace ChatSystem.BLL.Interfaces
          Task<RegisterResponse> RegisterPatient(RegisterPatientRequest registerPatientDto , HttpRequest request);
          Task<ForgetPasswordResponse> ForgetPasswordAsync(ForgetPasswordRequest request);
         Task<ResetPasswordResponse> ResetPasswordAsync(ResetPasswordRequest request);
+        Task<ApiResponce<bool>> UploadProfilePictureAsync(IFormFile file, string userId);
+        Task<ApiResponce<bool>> DeleteProfilePictureAsync(string userId);
     }
 }
