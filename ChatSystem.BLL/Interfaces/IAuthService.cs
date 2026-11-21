@@ -20,5 +20,6 @@ namespace ChatSystem.BLL.Interfaces
         Task<ResetPasswordResponse> ResetPasswordAsync(ResetPasswordRequest request);
         Task<ApiResponce<bool>> UploadProfilePictureAsync(IFormFile file, string userId);
         Task<ApiResponce<bool>> DeleteProfilePictureAsync(string userId);
+        Task<LoginResponse> RefreshTokenAsync(TokenApiRequest request);
     }
 }

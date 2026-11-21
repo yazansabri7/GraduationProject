@@ -24,6 +24,8 @@ namespace ChatSystem.DAL.Models
 
         public string? CodeResetPassword { get; set; } 
         public DateTime? CodeResetPasswordExpiration { get; set; }
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiration { get; set; }
 
 
 

@@ -7,5 +7,6 @@ namespace ChatSystem.DTO.DtoResponce
     public class LoginResponse : BaseResponse
     {
         public string? Token { get; set; }
+        public string? RefreshToken { get; set; }
     }
 }
