@@ -355,10 +355,12 @@ namespace ChatSystem.BLL.Services
             };
         }
 
+
         public async Task<ApiResponce<bool>> UploadProfilePictureAsync(IFormFile file, string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            if(user is null)
+
+            if (user is null)
             {
                 return new ApiResponce<bool>
                 {
@@ -366,7 +368,8 @@ namespace ChatSystem.BLL.Services
                     Message = "User not found"
                 };
             }
-            if(file is null || file.Length == 0)
+
+            if (file is null || file.Length == 0)
             {
                 return new ApiResponce<bool>
                 {
@@ -374,14 +377,84 @@ namespace ChatSystem.BLL.Services
                     Message = "File is empty"
                 };
             }
-            user.ProfilePicture = await _fileService.UploadAsync(file, "ProfilePictures");
-            await _userManager.UpdateAsync(user);
-            return new ApiResponce<bool>
+
+            // Save the old picture name
+            var oldPicture = user.ProfilePicture;
+
+            string? newPicture = null;
+
+            try
             {
-                Success = true,
-                Message = "Profile picture uploaded successfully"
-            };
+                // Upload new picture first
+                newPicture = await _fileService.UploadAsync(
+                    file, "ProfilePictures");
+
+                if (string.IsNullOrEmpty(newPicture))
+                {
+                    return new ApiResponce<bool>
+                    {
+                        Success = false,
+                        Message = "Failed to upload picture"
+                    };
+                }
+
+                // Update database
+                user.ProfilePicture = newPicture;
+
+                var result = await _userManager.UpdateAsync(user);
+
+                if (!result.Succeeded)
+                {
+                    user.ProfilePicture = oldPicture;
+
+                    await _fileService.DeleteAsync(
+                        "ProfilePictures", newPicture);
+
+                    return new ApiResponce<bool>
+                    {
+                        Success = false,
+                        Message = "Failed to save profile picture",
+                        Errors = result.Errors.Select(e => e.Description).ToList()
+                    };
+                }
+
+                // Delete old picture after successful update
+                if (!string.IsNullOrEmpty(oldPicture))
+                {
+                    
+                        await _fileService.DeleteAsync(
+                            "ProfilePictures", oldPicture);
+                   
+                }
+
+                return new ApiResponce<bool>
+                {
+                    Success = true,
+                    Message = "Profile picture updated successfully",
+                    Data = true
+                };
+            }
+            
+            catch (Exception)
+            {
+              // cleanup of the new file
+                if (!string.IsNullOrEmpty(newPicture))
+                {
+                  
+                        await _fileService.DeleteAsync(
+                            "ProfilePictures", newPicture);
+                  
+                }
+
+                return new ApiResponce<bool>
+                {
+                    Success = false,
+                    Message = "Failed to update profile picture",
+                    Data = false
+                };
+            }
         }
+
 
         public async Task<ApiResponce<bool>> DeleteProfilePictureAsync(string userId)
         {

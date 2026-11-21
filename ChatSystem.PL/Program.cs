@@ -149,7 +149,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors(MyAllowSpecificOrigins);
 
-
+app.UseStaticFiles();
 // Authentication must come BEFORE Authorization
 app.UseAuthentication();
 app.UseAuthorization();
