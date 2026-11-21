@@ -111,5 +111,15 @@ namespace ChatSystem.PL.Areas.Identity
             }
             return Ok(response);
         }
+        [HttpPatch("RefreshToken")]
+        public async Task<IActionResult> RefreshToken([FromBody] TokenApiRequest request)
+        {
+            var response = await _authService.RefreshTokenAsync(request);
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
     }
 }

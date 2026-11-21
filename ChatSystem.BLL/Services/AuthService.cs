@@ -9,6 +9,7 @@ using ChatSystem.DTO.DtoResponce;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -92,11 +93,16 @@ namespace ChatSystem.BLL.Services
                     };
                 }
                 var token = await _jwtService.GenerateTokenAsync(user);
+                var refreshToken = _jwtService.GenerateRefreshToken();
+                user.RefreshToken = refreshToken;
+                user.RefreshTokenExpiration = DateTime.UtcNow.AddDays(7);
+                await _userManager.UpdateAsync(user);
                 return new LoginResponse
                 {
                     Success = true,
                     Message = "Login successful",
-                    Token = token
+                    Token = token,
+                    RefreshToken = refreshToken
                 };
             }
             catch (Exception ex) 
@@ -403,6 +409,36 @@ namespace ChatSystem.BLL.Services
             {
                 Success = true,
                 Message = "Profile picture deleted successfully"
+            };
+        }
+        public async Task<LoginResponse> RefreshTokenAsync(TokenApiRequest request)
+        {
+            var Token = request.Token;
+            var RefreshToken = request.RefreshToken;
+            var principal = _jwtService.GetPrincipalFromExpiredToken(Token);
+            var userName = principal.Identity?.Name;
+            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+            if(user is null || user.RefreshToken != RefreshToken || user.RefreshTokenExpiration <= DateTime.UtcNow)
+            {
+                return new LoginResponse
+                {
+                    Success = false,
+                    Message = "User not found"
+                };
+
+            }
+            var newToken = await _jwtService.GenerateTokenAsync(user);
+            var newRefreshToken = _jwtService.GenerateRefreshToken();
+            user.RefreshToken = newRefreshToken;
+
+            await _userManager.UpdateAsync(user);
+
+            return new LoginResponse
+            {
+                Success = true,
+                Message = "Token refreshed successfully",
+                Token = newToken,
+                RefreshToken = newRefreshToken
             };
         }
     }
