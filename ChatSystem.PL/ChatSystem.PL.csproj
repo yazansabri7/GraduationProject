@@ -23,4 +23,8 @@
 		<ProjectReference Include="..\ChatSystem.DTO\ChatSystem.DTO.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="wwwroot\images\ProfilePictures\" />
+	</ItemGroup>
+
 </Project>
