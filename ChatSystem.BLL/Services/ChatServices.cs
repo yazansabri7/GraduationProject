@@ -106,6 +106,15 @@ namespace ChatSystem.BLL.Services
         {
             var chats= await _chatRepository.GetByPatientIdAsync(patientId);
 
+            var response = chats.Select(chat =>
+            {
+                var dto = chat.Adapt<ChatResponce>();
+
+                dto.FullName = chat.DoctorPatient.Doctor.User.FullName;
+
+                return dto;
+            }).ToList();
+
             return new ApiResponce<List<ChatResponce>>
             {
                 Message = "Chats retrieved successfully.",

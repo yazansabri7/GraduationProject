@@ -21,6 +21,13 @@ namespace ChatSystem.BLL.MapsterConfigurations
                     dest => dest.FullName,
                     src => src.DoctorPatient.Patient.User.FullName
                 );
+            TypeAdapterConfig<Chat, ChatResponce>
+                .NewConfig()
+                .Map(
+                    dest => dest.FullName,
+                    src => src.DoctorPatient.Doctor.User.FullName
+                );
+
         }
     }
 }
