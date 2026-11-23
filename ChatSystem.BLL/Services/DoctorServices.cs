@@ -18,12 +18,14 @@ namespace ChatSystem.BLL.Services
             _doctorRepository = doctorRepository;
         }
 
-        public Task<ApiResponce<IEnumerable<DoctorResponse>>> GetAvailableDoctorsAsync()
+        public async Task<ApiResponce<IEnumerable<DoctorResponse>>> GetAvailableDoctorsAsync()
         {
             try
             {
-                var doctors = _doctorRepository.GetAvailableDoctorsAsync().Result;
+                var doctors = await _doctorRepository.GetAvailableDoctorsAsync();
+
                 var doctorResponses = new List<DoctorResponse>();
+
                 foreach (var doctor in doctors)
                 {
                     var doctorResponse = new DoctorResponse
@@ -33,22 +35,24 @@ namespace ChatSystem.BLL.Services
                         ProfileImage = doctor.User.ProfilePicture,
                         IsAvailable = doctor.IsAvailable
                     };
+
                     doctorResponses.Add(doctorResponse);
                 }
-                return Task.FromResult(new ApiResponce<IEnumerable<DoctorResponse>>
+
+                return new ApiResponce<IEnumerable<DoctorResponse>>
                 {
                     Success = true,
                     Message = "Available doctors retrieved successfully.",
                     Data = doctorResponses
-                });
+                };
             }
             catch (Exception ex)
             {
-                return Task.FromResult(new ApiResponce<IEnumerable<DoctorResponse>>
+                return new ApiResponce<IEnumerable<DoctorResponse>>
                 {
                     Success = false,
                     Message = $"An error occurred while retrieving available doctors: {ex.Message}"
-                });
+                };
             }
         }
 
