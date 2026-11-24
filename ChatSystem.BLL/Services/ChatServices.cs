@@ -54,13 +54,21 @@ namespace ChatSystem.BLL.Services
         public async Task<ApiResponce<List<ChatResponce>>> GetByDoctorIdAsync(int doctorId)
         {
             var chats = await _chatRepository.GetByDoctorIdAsync(doctorId);
-           
+
+            var response = chats.Select(chat =>
+            {
+                var dto = chat.Adapt<ChatResponce>();
+
+                dto.FullName = chat.DoctorPatient.Patient.User.FullName;
+
+                return dto;
+            }).ToList();
 
             return new ApiResponce<List<ChatResponce>>
             {
                 Message = "Chats retrieved successfully.",
                 Success = true,
-                Data = chats.Adapt<List<ChatResponce>>()
+                Data = response
             };
         }
 
@@ -104,7 +112,7 @@ namespace ChatSystem.BLL.Services
 
         public async Task<ApiResponce<List<ChatResponce>>> GetByPatientIdAsync(int patientId)
         {
-            var chats= await _chatRepository.GetByPatientIdAsync(patientId);
+            var chats = await _chatRepository.GetByPatientIdAsync(patientId);
 
             var response = chats.Select(chat =>
             {
@@ -119,7 +127,7 @@ namespace ChatSystem.BLL.Services
             {
                 Message = "Chats retrieved successfully.",
                 Success = true,
-                Data = chats.Adapt<List<ChatResponce>>()
+                Data = response
             };
         }
     }
