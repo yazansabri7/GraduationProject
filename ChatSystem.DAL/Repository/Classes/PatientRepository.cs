@@ -32,5 +32,13 @@ namespace ChatSystem.DAL.Repository.Classes
             .FirstOrDefaultAsync();
             return userId;
         }
+        public async Task<Patient?> GetPatientProfileAsync(int patientId)
+        {
+            var patient = await _context.Patients
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.Id == patientId);
+            
+            return patient;
+        }
     }
 }

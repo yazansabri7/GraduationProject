@@ -2,7 +2,10 @@
 using ChatSystem.DAL.Models;
 using ChatSystem.DAL.Repository.Classes;
 using ChatSystem.DAL.Repository.Interfaces;
+using ChatSystem.DTO.DtoRequests;
 using ChatSystem.DTO.DtoResponce;
+using Mapster;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -76,6 +79,27 @@ namespace ChatSystem.BLL.Services
             };
         }
 
+        public async Task<ApiResponce<DoctorProfileResponse>> GetDoctorProfileAsync(string userId, HttpRequest request)
+        {
+            var doctorId = await _doctorRepository.getDoctorIdByUserId(userId);
+            if(doctorId == null)
+            {
+                return new ApiResponce<DoctorProfileResponse>
+                {
+                    Success = false,
+                    Message = "Doctor not found."
+                };
+            }
+            var doctor = await _doctorRepository.GetDoctorProfileAsync(doctorId.Value);
+            var response = doctor.BuildAdapter().AddParameters("Scheme", request.Scheme).AddParameters("Host", request.Host).AdaptToType<DoctorProfileResponse>();
+            return new ApiResponce<DoctorProfileResponse>
+            {
+                Success = true,
+                Message = "Doctor profile retrieved successfully.",
+                Data = response
+            };
+        }
+
         public async Task<ApiResponce<string>> GetUserIdByDoctorId(int doctorId)
         {
             var doctor = await _doctorRepository.getUserIdByDoctorId(doctorId);
@@ -94,6 +118,49 @@ namespace ChatSystem.BLL.Services
                 Success = true,
                 Message="Done.",
                 Data = doctor
+            };
+        }
+
+        public async Task<ApiResponce<bool>> UpdateDoctorProfileAsync(string userId, UpdateDoctorProfileRequest request)
+        {
+            var doctorId = await _doctorRepository.getDoctorIdByUserId(userId);
+            if (doctorId == null)
+            {
+                return new ApiResponce<bool>
+                {
+                    Success = false,
+                    Message = "Doctor not found."
+                };
+            }
+
+            var doctor = await _doctorRepository.GetDoctorProfileAsync(doctorId.Value);
+            if (doctor is null || doctor.User is null)
+            {
+                return new ApiResponce<bool>
+                {
+                    Success = false,
+                    Data = false,
+                    Message = "Doctor not found"
+                };
+            }
+            // Update ApplicationUser properties
+            if (request.FullName != null)
+                doctor.User.FullName = request.FullName.Trim();
+
+            if (request.PhoneNumber != null)
+                doctor.User.PhoneNumber = request.PhoneNumber.Trim();
+
+            if (request.City != null)
+                doctor.User.City = request.City.Trim();
+
+            // Save changes
+            await _doctorRepository.SaveChangesAsync();
+
+            return new ApiResponce<bool>
+            {
+                Success = true,
+                Data = true,
+                Message = "Doctor profile updated successfully"
             };
         }
     }

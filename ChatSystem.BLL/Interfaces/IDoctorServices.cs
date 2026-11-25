@@ -1,4 +1,6 @@
-﻿using ChatSystem.DTO.DtoResponce;
+﻿using ChatSystem.DTO.DtoRequests;
+using ChatSystem.DTO.DtoResponce;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,5 +12,7 @@ namespace ChatSystem.BLL.Interfaces
         Task<ApiResponce<IEnumerable<DoctorResponse>>> GetAvailableDoctorsAsync();
         public Task<ApiResponce<int>> GetDoctorIdByUserId(string userId);
         Task<ApiResponce<string>> GetUserIdByDoctorId(int doctorId);
+        Task<ApiResponce<DoctorProfileResponse>> GetDoctorProfileAsync(string userId, HttpRequest request);
+        Task<ApiResponce<bool>> UpdateDoctorProfileAsync(string userId, UpdateDoctorProfileRequest request);
     }
 }

@@ -55,5 +55,13 @@ namespace ChatSystem.DAL.Repository.Classes
         {
             return await _context.Doctors.Where(d=>d.Id == doctorId).Select(d=>d.UserId).FirstOrDefaultAsync();
         }
+        public async Task<Doctor?> GetDoctorProfileAsync(int doctorId)
+        {
+            return await _context.Doctors.Include(d => d.User).FirstOrDefaultAsync(d => d.Id == doctorId);
+        }
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 }

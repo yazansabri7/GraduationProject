@@ -130,6 +130,7 @@ builder.Services.AddScoped< INotificationService,NotificationService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationSender,SignalRNotificationSender>();
 builder.Services.AddSignalR();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 
 //Add Mapster Configurations
