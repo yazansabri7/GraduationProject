@@ -27,6 +27,48 @@ namespace ChatSystem.BLL.MapsterConfigurations
                     dest => dest.FullName,
                     src => src.DoctorPatient.Doctor.User.FullName
                 );
+            TypeAdapterConfig<Patient, PatientProfileResponse>
+                .NewConfig()
+                .Map(dest => dest.FullName, src => src.User.FullName)
+                .Map(dest => dest.UserName, src => src.User.UserName)
+                .Map(dest => dest.Email, src => src.User.Email)
+                .Map(dest => dest.PhoneNumber, src => src.User.PhoneNumber)
+                .Map(dest => dest.City, src => src.User.City)
+                .Map(dest => dest.DateOfBirth, src => src.User.DateOfBirth)
+                .Map(dest => dest.Gender, src => src.User.Gender)
+                .Map(dest => dest.ProfilePicture, src =>
+                    string.IsNullOrEmpty(src.User.ProfilePicture)
+                        ? null
+                        : $"{MapContext.Current.Parameters["Scheme"]}://{MapContext.Current.Parameters["Host"]}/images/ProfilePictures/{src.User.ProfilePicture}");
+
+
+
+            TypeAdapterConfig<Doctor, DoctorProfileResponse>
+                .NewConfig()
+                .Map(dest => dest.FullName, src => src.User.FullName)
+                .Map(dest => dest.UserName, src => src.User.UserName)
+                .Map(dest => dest.Email, src => src.User.Email)
+                .Map(dest => dest.PhoneNumber, src => src.User.PhoneNumber)
+                .Map(dest => dest.City, src => src.User.City)
+                .Map(dest => dest.DateOfBirth, src => src.User.DateOfBirth)
+                .Map(dest => dest.Gender, src => src.User.Gender)
+                .Map(dest => dest.ProfilePicture, src =>
+                    string.IsNullOrEmpty(src.User.ProfilePicture)
+                        ? null
+                        : $"{MapContext.Current.Parameters["Scheme"]}://{MapContext.Current.Parameters["Host"]}/images/ProfilePictures/{src.User.ProfilePicture}")
+                .Map(dest => dest.Specialization, src => src.Specialization)
+                .Map(dest => dest.IsAvailable, src => src.IsAvailable)
+                .Map(dest => dest.ActivePatientsCount, src => src.ActivePatientsCount)
+                .Map(dest => dest.MaxPatients, src => src.MaxPatients);
+
+
+            TypeAdapterConfig<ApplicationUser, AdminProfileResponse>
+                .NewConfig()
+                .Map(dest => dest.ProfilePicture, src =>
+                    string.IsNullOrEmpty(src.ProfilePicture)
+                        ? null
+                        : $"{MapContext.Current.Parameters["Scheme"]}://{MapContext.Current.Parameters["Host"]}/images/ProfilePictures/{src.ProfilePicture}");
+
 
         }
     }

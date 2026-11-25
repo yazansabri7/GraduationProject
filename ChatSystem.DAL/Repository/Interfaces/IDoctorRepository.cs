@@ -11,5 +11,7 @@ namespace ChatSystem.DAL.Repository.Interfaces
         Task<string?> getUserIdByDoctorId(int doctorId);
         Task<IEnumerable<Doctor>> GetAvailableDoctorsAsync();
         Task<bool> TryIncrementPatientCountAsync(int doctorId);
+        Task<Doctor?> GetDoctorProfileAsync(int doctorId);
+        Task SaveChangesAsync();
     }
 }
