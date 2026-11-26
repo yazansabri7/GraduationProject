@@ -139,5 +139,23 @@ namespace ChatSystem.PL.Areas.Doctor.Controller
             return Ok(result);
         }
 
+        [HttpGet("patient/{patientId}")]
+        [Authorize(Roles = "Doctor")]
+        public async Task<IActionResult> GetPatientMedications([FromRoute] int patientId)
+        {
+            var doctorUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(doctorUserId))
+            {
+                return Unauthorized();
+            }
+
+            var result = await _medicationService.GetPatientMedicationsForDoctorAsync(patientId, doctorUserId);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
     }
 }

@@ -305,5 +305,27 @@ namespace ChatSystem.BLL.Services
                 Data = true
             };
         }
+
+        public async Task<ApiResponce<List<MedicationResponse>>> GetPatientMedicationsForDoctorAsync(int patientId, string doctorUserId)
+        {
+            var isAssigned = await _doctorPatientRepository.IsDoctorAssignedToPatientAsync(doctorUserId, patientId);
+            if(!isAssigned)
+            {
+                return new ApiResponce<List<MedicationResponse>>
+                {
+                    Success = false,
+                    Message = "Doctor is not assigned to this patient.",
+                    Data = null
+                };
+            }
+            var medications = await _medicationRepository.GetMedicationsByPatientIdAsync(patientId);
+            var response = medications.Adapt<List<MedicationResponse>>();
+            return new ApiResponce<List<MedicationResponse>>
+            {
+                Success = true,
+                Message = "Medications retrieved successfully.",
+                Data = response
+            };
+        }
     }
 }
