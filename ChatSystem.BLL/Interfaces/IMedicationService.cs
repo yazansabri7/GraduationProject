@@ -15,5 +15,6 @@ namespace ChatSystem.BLL.Interfaces
         Task<ApiResponce<bool>> AddMedicationForPatientAsync(PatientMedicationRequest request, string patientUserId);
         Task<ApiResponce<bool>> UpdateMyMedicationAsync(int id, PatientMedicationRequest request, string patientUserId);
         Task<ApiResponce<bool>> DeleteMyMedicationAsync(int id, string patientUserId);
+        Task<ApiResponce<List<MedicationResponse>>> GetPatientMedicationsForDoctorAsync(int patientId , string doctorUserId);
     }
 }
