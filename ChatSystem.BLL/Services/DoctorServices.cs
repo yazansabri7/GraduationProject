@@ -17,10 +17,12 @@ namespace ChatSystem.BLL.Services
     {
         private readonly IDoctorRepository _doctorRepository;
         private readonly IDoctorPatientRepository _doctorPatientRepository;
-        public DoctorServices(IDoctorRepository doctorRepository , IDoctorPatientRepository doctorPatientRepository)
+        private readonly IPatientRepository _patientRepository;
+        public DoctorServices(IDoctorRepository doctorRepository , IDoctorPatientRepository doctorPatientRepository , IPatientRepository patientRepository)
         {
             _doctorRepository = doctorRepository;
             _doctorPatientRepository = doctorPatientRepository;
+            _patientRepository = patientRepository;
         }
 
         public async Task<ApiResponce<IEnumerable<DoctorResponse>>> GetAvailableDoctorsAsync()
@@ -119,6 +121,54 @@ namespace ChatSystem.BLL.Services
             {
                 Success = true,
                 Message = "Patients retrieved successfully.",
+                Data = response
+            };
+        }
+
+        public async Task<ApiResponce<PatientProfileResponse>> GetPatientDetailsAsync(string doctorUserId, int patientId, HttpRequest request)
+        {
+            var doctorId = await _doctorRepository.getDoctorIdByUserId(doctorUserId);
+            if (doctorId == null)
+            {
+                return new ApiResponce<PatientProfileResponse>
+                {
+                    Success = false,
+                    Message = "Doctor not found."
+                };
+            }
+            var patientCheck = await _patientRepository.GetById(patientId);
+            if(patientCheck == null)
+            {
+                return new ApiResponce<PatientProfileResponse>
+                {
+                    Success = false,
+                    Message = "Patient not found."
+                };
+            }
+            var isAssigned = await _doctorPatientRepository.IsDoctorAssignedToPatientAsync(doctorUserId, patientId);
+            if (!isAssigned)
+            {
+                return new ApiResponce<PatientProfileResponse>
+                {
+                    Success = false,
+                    Message = "Patient not assigned to this doctor."
+                };
+            }
+
+            var patient = await _patientRepository.GetPatientProfileAsync(patientId);
+            if (patient is null || patient.User is null)
+            {
+                return new ApiResponce<PatientProfileResponse>
+                {
+                    Success = false,
+                    Message = "Patient not found"
+                };
+            }
+            var response = patient.BuildAdapter().AddParameters("Scheme", request.Scheme).AddParameters("Host", request.Host).AdaptToType<PatientProfileResponse>();
+            return new ApiResponce<PatientProfileResponse>
+            {
+                Success = true,
+                Message = "Patient details retrieved successfully.",
                 Data = response
             };
         }

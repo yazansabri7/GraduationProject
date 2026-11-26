@@ -36,6 +36,23 @@ namespace ChatSystem.PL.Areas.Doctor.Controller
 
             return Ok(response);
         }
+        [HttpGet("PatientDetails/{patientId}")]
+        public async Task<IActionResult> GetPatientDetails([FromRoute] int patientId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var response = await _doctorServices.GetPatientDetailsAsync(userId, patientId, Request);
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
 
         [HttpGet("profile")]
         public async Task<IActionResult> GetDoctorProfile()
