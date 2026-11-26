@@ -70,6 +70,18 @@ namespace ChatSystem.BLL.MapsterConfigurations
                         : $"{MapContext.Current.Parameters["Scheme"]}://{MapContext.Current.Parameters["Host"]}/images/ProfilePictures/{src.ProfilePicture}");
 
 
+
+
+            TypeAdapterConfig<Patient, PatientResponse>
+                .NewConfig()
+                .Map(dest => dest.PatientId, src => src.Id)
+                .Map(dest => dest.FullName, src => src.User.FullName)
+                .Map(dest => dest.ProfilePicture, src =>
+                    string.IsNullOrEmpty(src.User.ProfilePicture)
+                        ? null
+                        : $"{MapContext.Current.Parameters["Scheme"]}://{MapContext.Current.Parameters["Host"]}/images/ProfilePictures/{src.User.ProfilePicture}");
+
+
         }
     }
 }

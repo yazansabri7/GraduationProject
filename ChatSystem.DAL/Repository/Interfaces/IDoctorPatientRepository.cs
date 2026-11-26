@@ -10,5 +10,6 @@ namespace ChatSystem.DAL.Repository.Interfaces
         Task<DoctorPatient?> GetByDoctorPatientAsync(int doctorId, int patientId);
         Task<DoctorPatient> AddAsync(DoctorPatient doctorPatient);
         Task<bool> IsDoctorAssignedToPatientAsync(string doctorUserId, int patientId);
+        Task<List<Patient>> GetMyPatientsAsync(int doctorId);
     }
 }

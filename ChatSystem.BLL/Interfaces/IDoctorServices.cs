@@ -14,5 +14,6 @@ namespace ChatSystem.BLL.Interfaces
         Task<ApiResponce<string>> GetUserIdByDoctorId(int doctorId);
         Task<ApiResponce<DoctorProfileResponse>> GetDoctorProfileAsync(string userId, HttpRequest request);
         Task<ApiResponce<bool>> UpdateDoctorProfileAsync(string userId, UpdateDoctorProfileRequest request);
+        Task<ApiResponce<List<PatientResponse>>> GetMyPatient(string userId , HttpRequest request);
     }
 }
