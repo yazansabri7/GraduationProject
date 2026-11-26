@@ -18,6 +18,25 @@ namespace ChatSystem.PL.Areas.Doctor.Controller
         {
             _doctorServices = doctorServices;
         }
+
+        [HttpGet("MyPatients")]
+        public async Task<IActionResult> GetMyPatients()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var response = await _doctorServices.GetMyPatient(userId, Request);
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
         [HttpGet("profile")]
         public async Task<IActionResult> GetDoctorProfile()
         {

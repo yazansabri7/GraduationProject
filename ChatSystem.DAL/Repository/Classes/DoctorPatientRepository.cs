@@ -29,6 +29,18 @@ namespace ChatSystem.DAL.Repository.Classes
             var doctorPatient = await _context.DoctorPatients.FirstOrDefaultAsync(dp => dp.DoctorId == doctorId && dp.PatientId == patientId);
             return doctorPatient;
         }
+
+        public async Task<List<Patient>> GetMyPatientsAsync(int doctorId)
+        {
+            return await _context.DoctorPatients
+               .AsNoTracking()
+               .Where(dp => dp.DoctorId == doctorId)
+               .Include(dp => dp.Patient)
+                   .ThenInclude(p => p.User)
+               .Select(dp => dp.Patient)
+               .ToListAsync();
+        }
+
         public async Task<bool> IsDoctorAssignedToPatientAsync(string doctorUserId, int patientId)
         {
             var doctor = await _context.Doctors.AsNoTracking().FirstOrDefaultAsync(d => d.UserId == doctorUserId);

@@ -16,9 +16,11 @@ namespace ChatSystem.BLL.Services
     public class DoctorServices : IDoctorServices
     {
         private readonly IDoctorRepository _doctorRepository;
-        public DoctorServices(IDoctorRepository doctorRepository)
+        private readonly IDoctorPatientRepository _doctorPatientRepository;
+        public DoctorServices(IDoctorRepository doctorRepository , IDoctorPatientRepository doctorPatientRepository)
         {
             _doctorRepository = doctorRepository;
+            _doctorPatientRepository = doctorPatientRepository;
         }
 
         public async Task<ApiResponce<IEnumerable<DoctorResponse>>> GetAvailableDoctorsAsync()
@@ -96,6 +98,27 @@ namespace ChatSystem.BLL.Services
             {
                 Success = true,
                 Message = "Doctor profile retrieved successfully.",
+                Data = response
+            };
+        }
+
+        public async Task<ApiResponce<List<PatientResponse>>> GetMyPatient(string userId , HttpRequest request)
+        {
+            var doctorId = await _doctorRepository.getDoctorIdByUserId(userId);
+            if(doctorId == null)
+            {
+                return new ApiResponce<List<PatientResponse>>
+                {
+                    Success = false,
+                    Message = "Doctor not found."
+                };
+            }
+            var patients = await _doctorPatientRepository.GetMyPatientsAsync(doctorId.Value);
+            var response = patients.BuildAdapter().AddParameters("Scheme", request.Scheme).AddParameters("Host", request.Host).AdaptToType<List<PatientResponse>>();
+            return new ApiResponce<List<PatientResponse>>
+            {
+                Success = true,
+                Message = "Patients retrieved successfully.",
                 Data = response
             };
         }
